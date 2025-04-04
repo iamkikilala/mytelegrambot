@@ -147,7 +147,7 @@ def handle_message(update: Update, context):
 
 # === 主程式 ===
 def main():
-    print("🚀 Bot 正在啟動中...")
+    print("🚀 Bot 正在啟動中...")  # 👈 這裡放
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("price", get_price))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
