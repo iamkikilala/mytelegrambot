@@ -60,6 +60,34 @@ def get_e3a_price():
     except Exception as e:
         print("價格錯誤：", e)
         return None, None
+# === 截圖 ===
+def screenshot_chart():
+    try:
+        from selenium import webdriver
+        from selenium.webdriver.chrome.options import Options
+        from selenium.webdriver.chrome.service import Service
+        from webdriver_manager.chrome import ChromeDriverManager
+
+        options = Options()
+        options.add_argument('--headless')
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+
+        service = Service(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service, options=options)
+
+        url = f"https://dexscreener.com/solana/{E3A_ADDRESS}"
+        driver.set_window_size(1280, 720)
+        driver.get(url)
+        driver.implicitly_wait(5)
+
+        screenshot_path = "chart.png"
+        driver.save_screenshot(screenshot_path)
+        driver.quit()
+        return screenshot_path
+    except Exception as e:
+        print("Screenshot error:", e)
+        return None
 
 # === 指令處理 ===
 def get_price(update: Update, context):
@@ -73,14 +101,20 @@ def get_price(update: Update, context):
 def handle_message(update: Update, context):
     msg = update.message.text.lower()
 
-    if any(x in msg for x in ["ca", "合約", "contract"]):
-        price, market_cap = get_e3a_price()
-        if price:
-            return update.message.reply_text(
-                f"🌕 E3A 合約地址：\n{E3A_ADDRESS}\nE3A 現價：${price}\n市值：${market_cap:,} USD"
-            )
-        else:
-            return update.message.reply_text("無法取得幣價資訊。")
+  if any(x in msg for x in ["ca", "合約", "contract"]):
+    price, market_cap = get_e3a_price()
+    if price:
+        update.message.reply_text(
+            f"📊 *E3A Token Info*\n\n🔗 Contract: `{E3A_ADDRESS}`\n💰 Price: ${price}\n📈 Market Cap: ${market_cap:,} USD"
+        )
+        chart = screenshot_chart()
+        if chart:
+            with open(chart, 'rb') as photo:
+                update.message.reply_photo(photo=photo)
+    else:
+        update.message.reply_text("Failed to fetch price data.")
+    return
+
 
     if any(x in msg for x in ["價格", "價錢", "price"]):
         return get_price(update, context)
