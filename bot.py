@@ -190,15 +190,22 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
 
 # === 啟動主程式（採用 Webhook 模式，適合雲端部屬）===
-if __name__ == '__main__':
+import asyncio
+import os
+
+async def main():
     app = ApplicationBuilder().token(os.environ["BOT_TOKEN"]).build()
 
     app.add_handler(CommandHandler("price", get_price))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome_on_join))
 
-    app.run_webhook(
+    await app.run_webhook(
         listen="0.0.0.0",
         port=int(os.environ.get("PORT", 8080)),
         webhook_url=f"{os.environ.get('WEBHOOK_URL')}/"
     )
+
+if __name__ == '__main__':
+    asyncio.run(main())
+
