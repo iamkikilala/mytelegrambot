@@ -52,17 +52,23 @@ text_responses = {
 # === 查價格功能 ===
 def get_e3a_price():
     try:
+        print("正在查詢 E3A 價格...")
         url = f"https://api.dexscreener.com/latest/dex/search?q={E3A_ADDRESS}"
         res = requests.get(url)
         data = res.json()
         pair = data.get('pairs', [{}])[0]
-        return pair.get('priceUsd'), pair.get('marketCap')
+        price = pair.get('priceUsd')
+        market_cap = pair.get('marketCap')
+        print(f"查詢成功：價格 ${price}, 市值 ${market_cap}")
+        return price, market_cap
     except Exception as e:
         print("價格錯誤：", e)
         return None, None
-# === 截圖 ===
+
+# === Dexscreener 截圖功能 ===
 def screenshot_chart():
     try:
+        print("準備開啟 headless Chrome 擷取圖表...")
         from selenium import webdriver
         from selenium.webdriver.chrome.options import Options
         from selenium.webdriver.chrome.service import Service
@@ -84,22 +90,27 @@ def screenshot_chart():
         screenshot_path = "chart.png"
         driver.save_screenshot(screenshot_path)
         driver.quit()
+        print("圖表擷取完成！")
         return screenshot_path
     except Exception as e:
         print("Screenshot error:", e)
         return None
 
-# === 指令處理 ===
+# === /price 指令處理 ===
 def get_price(update: Update, context):
+    print("收到 /price 指令")
     price, market_cap = get_e3a_price()
     if price:
-        update.message.reply_text(f"🌕 E3A 合約地址：\n{E3A_ADDRESS}\nE3A 現價：${price}\n市值：${market_cap:,} USD")
+        update.message.reply_text(
+            f"🌕 E3A Contract Address:\n{E3A_ADDRESS}\nCurrent Price: ${price}\nMarket Cap: ${market_cap:,} USD"
+        )
     else:
-        update.message.reply_text("無法取得 E3A 價格資訊。")
+        update.message.reply_text("Failed to fetch E3A price data.")
 
-# === 一般訊息回覆 ===
+# === 文字訊息處理 ===
 def handle_message(update: Update, context):
     msg = update.message.text.lower()
+    print(f"收到訊息：{msg}")
 
     if any(x in msg for x in ["ca", "合約", "contract"]):
         price, market_cap = get_e3a_price()
@@ -115,8 +126,6 @@ def handle_message(update: Update, context):
         else:
             update.message.reply_text("Failed to fetch price data.")
         return
-
-
 
     if any(x in msg for x in ["價格", "價錢", "price"]):
         return get_price(update, context)
@@ -136,16 +145,15 @@ def handle_message(update: Update, context):
         if keyword in msg:
             return update.message.reply_text(random.choice(replies))
 
-
 # === 主程式 ===
 def main():
+    print("🚀 Bot 正在啟動中...")
     app = ApplicationBuilder().token(TOKEN).build()
-
     app.add_handler(CommandHandler("price", get_price))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-
-    print("📡 Bot 正在 Render 上瘋狂跑起來（希望）...")
+    print("📡 Bot 已啟動，開始 polling 中...")
     app.run_polling()
 
 if __name__ == "__main__":
     main()
+
