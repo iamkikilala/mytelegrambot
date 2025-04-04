@@ -1,5 +1,5 @@
-python-telegram-bot[webhooks]
-python-dotenv
+python-telegram-bot
 requests
 selenium
 webdriver-manager
+python-dotenv
