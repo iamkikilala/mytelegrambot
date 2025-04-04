@@ -47,7 +47,7 @@ text_responses = {
         "Good night, hope you rest well ✨",
         "Good night! Relax and recharge 🌙",
         "Sleep tight and see you tomorrow 🌟"
-    ]
+    ],
     "早安": [
         "早啊！新的一天開始囉 🌞",
         "早安～今天也要閃閃發光 ✨",
