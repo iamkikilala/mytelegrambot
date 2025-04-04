@@ -10,12 +10,10 @@ load_dotenv()
 
 # 環境變數
 TOKEN = os.environ.get("BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
-WEBHOOK_URL = os.environ.get("WEBHOOK_URL", "https://your-app-name.onrender.com")
-PORT = int(os.environ.get("PORT", 8080))
 CHAT_ID = os.environ.get("CHAT_ID", "-1002606282067")
 E3A_ADDRESS = 'EKYotMbZR82JAVakfnaQbRfCE7oyWLsXVwfyjwTRdaos'
 
-# === 回應詞庫 ===
+# === 回應詞庫（中英混合） ===
 text_responses = {
     "gm": [
         "GM~ your message just turned on my happy mode! 🦡",
@@ -53,7 +51,7 @@ text_responses = {
     ]
 }
 
-# === 查價格 ===
+# === DexScreener 查詢價格 ===
 def get_e3a_price():
     try:
         url = f"https://api.dexscreener.com/latest/dex/search?q={E3A_ADDRESS}"
@@ -68,7 +66,7 @@ def get_e3a_price():
         print("幣價錯誤：", e)
     return None, None
 
-# === 圖表截圖 ===
+# === 產生價格走勢圖（利用 Selenium 截圖 Dexscreener 網頁） ===
 def screenshot_chart():
     try:
         from selenium import webdriver
@@ -97,7 +95,7 @@ def screenshot_chart():
         print("Screenshot error:", e)
         return None
 
-# === 指令處理 ===
+# === /price 指令 ===
 async def get_price(update: Update, context: ContextTypes.DEFAULT_TYPE):
     price, market_cap = get_e3a_price()
     if price:
@@ -110,6 +108,7 @@ async def get_price(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("無法取得 E3A 價格資訊。")
 
+# === 歡迎新用戶 ===
 async def welcome_on_join(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.new_chat_members:
         for member in update.message.new_chat_members:
@@ -122,6 +121,7 @@ async def welcome_on_join(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ]
             await update.message.reply_text(random.choice(greetings))
 
+# === 文字訊息處理 ===
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.message.text.lower()
 
@@ -167,13 +167,9 @@ async def main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome_on_join))
 
-    await app.run_webhook(
-        listen="0.0.0.0",
-        port=PORT,
-        webhook_url=f"{WEBHOOK_URL}/"
-    )
+    await app.run_polling()  # 改成輪詢模式
 
-# === 用 run_until_complete 避免 asyncio.run() ===
+# === 避免事件迴圈衝突 ===
 if __name__ == '__main__':
     import asyncio
 
