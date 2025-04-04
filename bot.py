@@ -72,9 +72,19 @@ def get_price(update: Update, context):
 # === 一般訊息回覆 ===
 def handle_message(update: Update, context):
     msg = update.message.text.lower()
-    
+
+    if any(x in msg for x in ["ca", "合約", "contract"]):
+        price, market_cap = get_e3a_price()
+        if price:
+            return update.message.reply_text(
+                f"🌕 E3A 合約地址：\n{E3A_ADDRESS}\nE3A 現價：${price}\n市值：${market_cap:,} USD"
+            )
+        else:
+            return update.message.reply_text("無法取得幣價資訊。")
+
     if any(x in msg for x in ["價格", "價錢", "price"]):
         return get_price(update, context)
+
     if any(k in msg for k in ["官網", "eternalai", "網站", "site", "網址"]):
         return update.message.reply_text("https://ai.eternalai.io/")
     if any(k in msg for k in ["白皮書", "paper", "whitepaper"]):
@@ -89,6 +99,7 @@ def handle_message(update: Update, context):
     for keyword, replies in text_responses.items():
         if keyword in msg:
             return update.message.reply_text(random.choice(replies))
+
 
 # === 主程式 ===
 def main():
