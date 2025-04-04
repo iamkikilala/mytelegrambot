@@ -207,5 +207,8 @@ async def main():
     )
 
 if __name__ == '__main__':
-    asyncio.run(main())
-
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
+git add bot.py
+git commit -m "fix: avoid RuntimeError - event loop already running"
+git push
