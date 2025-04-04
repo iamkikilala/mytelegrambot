@@ -101,19 +101,21 @@ def get_price(update: Update, context):
 def handle_message(update: Update, context):
     msg = update.message.text.lower()
 
-  if any(x in msg for x in ["ca", "合約", "contract"]):
-    price, market_cap = get_e3a_price()
-    if price:
-        update.message.reply_text(
-            f"📊 *E3A Token Info*\n\n🔗 Contract: `{E3A_ADDRESS}`\n💰 Price: ${price}\n📈 Market Cap: ${market_cap:,} USD"
-        )
-        chart = screenshot_chart()
-        if chart:
-            with open(chart, 'rb') as photo:
-                update.message.reply_photo(photo=photo)
-    else:
-        update.message.reply_text("Failed to fetch price data.")
-    return
+    if any(x in msg for x in ["ca", "合約", "contract"]):
+        price, market_cap = get_e3a_price()
+        if price:
+            update.message.reply_text(
+                f"📊 *E3A Token Info*\n\n🔗 Contract: `{E3A_ADDRESS}`\n💰 Price: ${price}\n📈 Market Cap: ${market_cap:,} USD",
+                parse_mode='Markdown'
+            )
+            chart = screenshot_chart()
+            if chart:
+                with open(chart, 'rb') as photo:
+                    update.message.reply_photo(photo=photo)
+        else:
+            update.message.reply_text("Failed to fetch price data.")
+        return
+
 
 
     if any(x in msg for x in ["價格", "價錢", "price"]):
