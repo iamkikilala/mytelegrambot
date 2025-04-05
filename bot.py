@@ -253,21 +253,30 @@ async def handle_message(update: Update, context):
             return
 
 # === 啟動主程式 ===
+import logging
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
+
 def main():
     print("🚀 Bot 正在啟動中...")
+
+    # 建立應用實例
     application = ApplicationBuilder().token(TOKEN).build()
+
+    # 確保刪除 webhook（Background Worker 一定要這個）
     application.bot.delete_webhook(drop_pending_updates=True)
 
-    # 指令
-    application.add_handler(CommandHandler("price", get_price))
+    # 加入指令處理器
     application.add_handler(CommandHandler("faq", faq))
     application.add_handler(CommandHandler("stats", stats))
+    application.add_handler(CommandHandler("price", stats))  # 讓 /price 與 /stats 同用一個 function
 
-    # 文字訊息與 scam 偵測
+    # 加入文字訊息處理器
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    application.add_handler(MessageHandler(filters.Entity("url"), scam_link_checker))
 
-    # 啟動 Tweet Watcher
+    # 加入防 scam 處理器（如有）
+    # application.add_handler(MessageHandler(filters.Entity("url"), scam_link_checker))  # 如果你已寫這段才打開
+
+    # 啟用 tweet watcher
     job_queue = application.job_queue
     if job_queue:
         job_queue.run_once(
@@ -279,4 +288,3 @@ def main():
 
     print("📡 Bot 已啟動，開始 polling 中...")
     application.run_polling()
-
