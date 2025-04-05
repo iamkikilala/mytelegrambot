@@ -5,4 +5,5 @@ webdriver-manager
 python-dotenv
 feedparser
 python-telegram-bot[job-queue]
+zhconv
 
