@@ -244,6 +244,25 @@ async def handle_message(update: Update, context):
         else:
             await update.message.reply_text("Failed to fetch price data.")
         return
+if any(x in msg for x in ["價格", "價錢", "price"]):
+        await get_price(update, context)
+        return
+
+    if any(k in msg for k in ["官網", "eternalai", "網站", "site", "網址"]):
+        await update.message.reply_text("https://ai.eternalai.io/")
+        return
+    if any(k in msg for k in ["白皮書", "paper", "whitepaper"]):
+        await update.message.reply_text("https://ai.eternalai.io/static/Helloword.pdf")
+        return
+    if any(k in msg for k in ["discord", "dc"]):
+        await update.message.reply_text("https://discord.com/invite/ZM7EdkCHZP")
+        return
+    if any(k in msg for k in ["telegram", "電報", "社群"]):
+        await update.message.reply_text("https://t.me/AIHelloWorld")
+        return
+    if any(k in msg for k in ["twitter", "推特"]):
+        await update.message.reply_text("https://x.com/e3a_eternalai?s=21&t=nKJh8aBy_Qblb-XTWP-UpQ")
+        return
 
     for keyword, replies in text_responses.items():
         if keyword in msg:
