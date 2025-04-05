@@ -354,7 +354,7 @@ def main():
     application.add_handler(CommandHandler("faq", faq))
     application.add_handler(CommandHandler("stats", stats))
     application.add_handler(CommandHandler("holders", holders))
-   application.add_handler(CommandHandler("help", help_command))
+    application.add_handler(CommandHandler("help", help_command))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
     job_queue = application.job_queue
