@@ -3,7 +3,7 @@ import random
 import requests
 from dotenv import load_dotenv
 from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
 
 # === 載入環境變數 ===
 load_dotenv()
@@ -97,59 +97,65 @@ def screenshot_chart():
         return None
 
 # === /price 指令處理 ===
-def get_price(update: Update, context):
+async def get_price(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print("收到 /price 指令")
     price, market_cap = get_e3a_price()
     if price:
-        update.message.reply_text(
+        await update.message.reply_text(
             f"🌕 E3A Contract Address:\n{E3A_ADDRESS}\nCurrent Price: ${price}\nMarket Cap: ${market_cap:,} USD"
         )
     else:
-        update.message.reply_text("Failed to fetch E3A price data.")
+        await update.message.reply_text("Failed to fetch E3A price data.")
 
 # === 文字訊息處理 ===
-def handle_message(update: Update, context):
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.message.text.lower()
     print(f"收到訊息：{msg}")
 
     if any(x in msg for x in ["ca", "合約", "contract"]):
         price, market_cap = get_e3a_price()
         if price:
-            update.message.reply_text(
+            await update.message.reply_text(
                 f"📊 *E3A Token Info*\n\n🔗 Contract: `{E3A_ADDRESS}`\n💰 Price: ${price}\n📈 Market Cap: ${market_cap:,} USD",
                 parse_mode='Markdown'
             )
             chart = screenshot_chart()
             if chart:
                 with open(chart, 'rb') as photo:
-                    update.message.reply_photo(photo=photo)
+                    await update.message.reply_photo(photo=photo)
         else:
-            update.message.reply_text("Failed to fetch price data.")
+            await update.message.reply_text("Failed to fetch price data.")
         return
 
     if any(x in msg for x in ["價格", "價錢", "price"]):
-        return get_price(update, context)
+        await get_price(update, context)
+        return
 
     if any(k in msg for k in ["官網", "eternalai", "網站", "site", "網址"]):
-        return update.message.reply_text("https://ai.eternalai.io/")
+        await update.message.reply_text("https://ai.eternalai.io/")
+        return
     if any(k in msg for k in ["白皮書", "paper", "whitepaper"]):
-        return update.message.reply_text("https://ai.eternalai.io/static/Helloword.pdf")
+        await update.message.reply_text("https://ai.eternalai.io/static/Helloword.pdf")
+        return
     if any(k in msg for k in ["discord", "dc"]):
-        return update.message.reply_text("https://discord.com/invite/ZM7EdkCHZP")
+        await update.message.reply_text("https://discord.com/invite/ZM7EdkCHZP")
+        return
     if any(k in msg for k in ["telegram", "電報", "社群"]):
-        return update.message.reply_text("https://t.me/AIHelloWorld")
+        await update.message.reply_text("https://t.me/AIHelloWorld")
+        return
     if any(k in msg for k in ["twitter", "推特"]):
-        return update.message.reply_text("https://x.com/e3a_eternalai?s=21&t=nKJh8aBy_Qblb-XTWP-UpQ")
+        await update.message.reply_text("https://x.com/e3a_eternalai?s=21&t=nKJh8aBy_Qblb-XTWP-UpQ")
+        return
 
     for keyword, replies in text_responses.items():
         if keyword in msg:
-            return update.message.reply_text(random.choice(replies))
+            await update.message.reply_text(random.choice(replies))
+            return
 
 # === 主程式 ===
 def main():
-    print("🚀 Bot 正在啟動中...")  # 👈 這裡放
+    print("🚀 Bot 正在啟動中...")
     app = ApplicationBuilder().token(TOKEN).build()
-    app.bot.delete_webhook(drop_pending_updates=True)
     app.add_handler(CommandHandler("price", get_price))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     print("📡 Bot 已啟動，開始 polling 中...")
@@ -157,4 +163,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
