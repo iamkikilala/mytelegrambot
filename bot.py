@@ -1,8 +1,11 @@
+# === 1. 載入必要套件 ===
 import os
 import random
 import requests
 import feedparser
 import asyncio
+import re
+import zhconv
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
@@ -13,6 +16,8 @@ load_dotenv()
 TOKEN = os.environ.get("BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
 E3A_ADDRESS = 'EKYotMbZR82JAVakfnaQbRfCE7oyWLsXVwfyjwTRdaos'
 CHAT_ID = os.environ.get("CHAT_ID", "-100xxxxxxxxxx")  # 替換為你的群組 chat_id
+HELIUS_KEY = os.environ.get("HELIUS_KEY", "your_helius_api_key")
+
 text_responses = {
     "gm": [
         "GM~ your message just turned on my happy mode! 🧡",
@@ -259,14 +264,20 @@ async def stats(update: Update, context):
         await update.message.reply_text("Failed to fetch stats.")
 
 # === 10. 處理訊息 ===
+import re
+import zhconv  # 放最上面 imports 一起
+
+# === 處理訊息 ===
 async def handle_message(update: Update, context):
     print("🧠 handle_message 被觸發")
     msg = update.message.text.lower()
 
-    if any(word in msg for word in ["airdrop", "fakewallet", "詐騙", "空投"]):
+    # === scam 偵測 ===
+    if any(word in msg for word in ["airdrop", "fakewallet", "詐騙", "诈骗", "空投"]):
         await update.message.reply_text("⚠️ Reminder: Never click on unofficial airdrop links. Always verify with the team.")
         return
 
+    # === 價格與合約關鍵字 ===
     if any(x in msg for x in ["ca", "合約", "contract", "價格", "價錢", "price"]):
         price, market_cap = get_e3a_price()
         if price:
@@ -281,6 +292,7 @@ async def handle_message(update: Update, context):
             await update.message.reply_text("Failed to fetch price data.")
         return
 
+    # === 官網與常見連結 ===
     if any(k in msg for k in ["官網", "eternalai", "網站", "site", "網址"]):
         await update.message.reply_text("https://ai.eternalai.io/")
         return
@@ -297,15 +309,17 @@ async def handle_message(update: Update, context):
         await update.message.reply_text("https://x.com/e3a_eternalai?s=21&t=nKJh8aBy_Qblb-XTWP-UpQ")
         return
 
-    import zhconv  # 一開始記得 import
-
-# ...
-
-    # === 問題關鍵字自動回覆 ===
-    msg_simplified = zhconv.convert(msg, 'zh-hans')  # 轉成簡體做比對
+    # === 問題關鍵字自動回覆（簡體轉換＋正則）===
+    msg_simplified = zhconv.convert(msg, 'zh-hans')
     for keyword, reply in question_responses.items():
-        if keyword in msg_simplified:
+        if re.search(keyword, msg_simplified):
             await update.message.reply_text(reply)
+            return
+
+    # === 早安晚安等關鍵詞詞庫 ===
+    for keyword, replies in text_responses.items():
+        if keyword in msg:
+            await update.message.reply_text(random.choice(replies))
             return
 
 
