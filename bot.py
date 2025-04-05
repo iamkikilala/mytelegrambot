@@ -151,14 +151,15 @@ def get_e3a_price():
 # === 5. 查持幣人數功能 ===
 def get_holder_count():
     try:
-        url = f"https://public-api.solscan.io/token/holders?tokenAddress={E3A_ADDRESS}&limit=1"
         headers = {"accept": "application/json"}
+        url = f"https://api.helius.xyz/v0/token-metadata?api-key={HELIUS_KEY}&mint={E3A_ADDRESS}"
         res = requests.get(url, headers=headers)
         data = res.json()
-        return data.get("total", "N/A")
+        return data.get("holders", "N/A")
     except Exception as e:
         print("取得持幣人數失敗：", e)
         return "N/A"
+
 # === 自動轉發推特貼文（每 5 分鐘） ===
 LAST_TWEET_LINK = None
 
@@ -203,6 +204,7 @@ async def holders(update: Update, context):
     await update.message.reply_text(
         f"📦 Current Holders of E3A: {holders} addresses"
     )
+
 
 # === /stats 指令 ===
 async def stats(update: Update, context):
