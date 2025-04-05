@@ -148,7 +148,17 @@ def get_e3a_price():
     except Exception as e:
         print("價格錯誤：", e)
         return None, None
-
+# === 5. 查持幣人數功能 ===
+def get_holder_count():
+    try:
+        url = f"https://public-api.solscan.io/token/holders?tokenAddress={E3A_ADDRESS}&limit=1"
+        headers = {"accept": "application/json"}
+        res = requests.get(url, headers=headers)
+        data = res.json()
+        return data.get("total", "N/A")
+    except Exception as e:
+        print("取得持幣人數失敗：", e)
+        return "N/A"
 # === 自動轉發推特貼文（每 5 分鐘） ===
 LAST_TWEET_LINK = None
 
@@ -178,43 +188,47 @@ async def tweet_watcher(application):
 # === /faq 指令 ===
 async def faq(update: Update, context):
     text = """❓ *FAQ:*\n
-*Q:* Where to buy E3A?
-*A:* You can view it on [DexScreener](https://dexscreener.com/).
-
-*Q:* Total Supply?
-*A:* 1,000,000,000
-
-*Q:* Will it be listed on CEX?
+*Q:* Where to buy E3A?  
+*A:* You can buy it here: [DexScreener](https://dexscreener.com/solana/EKYotMbZR82JAVakfnaQbRfCE7oyWLsXVwfyjwTRdaos)\n
+*Q:* Total Supply?  
+*A:* 1,000,000,000\n
+*Q:* Will it be listed on CEX?  
 *A:* Yes, roadmap includes Tier 1 exchange goals.
 """
     await update.message.reply_text(text, parse_mode="Markdown")
 
+# === 8. 持幣人數查詢 ===
+async def holders(update: Update, context):
+    holders = get_holder_count()
+    await update.message.reply_text(
+        f"📦 Current Holders of E3A: {holders} addresses"
+    )
+
 # === /stats 指令 ===
 async def stats(update: Update, context):
     price, market_cap = get_e3a_price()
+    holders = get_holder_count()
     if price:
         await update.message.reply_text(
             f"📊 *E3A Token Stats:*\n\n"
-            f"Price: ${price}\n"
-            f"Market Cap: ${market_cap:,} USD\n"
-            f"Contract: {E3A_ADDRESS}",
+            f"💰 Price: ${price}\n"
+            f"📈 Market Cap: ${market_cap:,} USD\n"
+            f"👛 Holders: {holders} addresses\n"
+            f"🔗 Contract: `{E3A_ADDRESS}`",
             parse_mode="Markdown"
         )
     else:
         await update.message.reply_text("Failed to fetch stats.")
-# === 處理文字訊息 ===
-async def handle_message(update: Update, context):
-    msg = update.message.text.lower()
-    print(f"收到訊息：{msg}")
 
-    # scam 偵測
+# === 10. 處理訊息 ===
+async def handle_message(update: Update, context):
+    print("🧠 handle_message 被觸發")
+    msg = update.message.text.lower()
+
     if any(word in msg for word in ["airdrop", "fakewallet", "詐騙", "空投"]):
-        await update.message.reply_text(
-            "⚠️ Reminder: Never click on unofficial airdrop links. Always verify with the team."
-        )
+        await update.message.reply_text("⚠️ Reminder: Never click on unofficial airdrop links. Always verify with the team.")
         return
 
-    # 合約或價格關鍵詞查詢
     if any(x in msg for x in ["ca", "合約", "contract", "價格", "價錢", "price"]):
         price, market_cap = get_e3a_price()
         if price:
@@ -229,55 +243,22 @@ async def handle_message(update: Update, context):
             await update.message.reply_text("Failed to fetch price data.")
         return
 
-    # 常用資訊
-    if any(k in msg for k in ["官網", "eternalai", "網站", "site", "網址"]):
-        await update.message.reply_text("https://ai.eternalai.io/")
-        return
-    if any(k in msg for k in ["白皮書", "paper", "whitepaper"]):
-        await update.message.reply_text("https://ai.eternalai.io/static/Helloword.pdf")
-        return
-    if any(k in msg for k in ["discord", "dc"]):
-        await update.message.reply_text("https://discord.com/invite/ZM7EdkCHZP")
-        return
-    if any(k in msg for k in ["telegram", "電報", "社群"]):
-        await update.message.reply_text("https://t.me/AIHelloWorld")
-        return
-    if any(k in msg for k in ["twitter", "推特"]):
-        await update.message.reply_text("https://x.com/e3a_eternalai?s=21&t=nKJh8aBy_Qblb-XTWP-UpQ")
-        return
-
-    # 關鍵字對應的詞庫
     for keyword, replies in text_responses.items():
         if keyword in msg:
             await update.message.reply_text(random.choice(replies))
             return
 
-# === 啟動主程式 ===
-import logging
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
-
+# === 11. 主程式 ===
 def main():
     print("🚀 Bot 正在啟動中...")
-
     application = ApplicationBuilder().token(TOKEN).build()
-
-    # 刪除 webhook，啟用 polling
     application.bot.delete_webhook(drop_pending_updates=True)
 
-    # 加入指令處理器
     application.add_handler(CommandHandler("faq", faq))
     application.add_handler(CommandHandler("stats", stats))
-
-    # 將 /price 指向 stats（如果沒有單獨定義 get_price）
-    application.add_handler(CommandHandler("price", stats))
-
-    # 加入文字處理器
+    application.add_handler(CommandHandler("holders", holders))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
-    # 防 scam 模式：可選
-    # application.add_handler(MessageHandler(filters.Entity("url"), scam_link_checker))
-
-    # 啟動 tweet watcher（使用 JobQueue）
     job_queue = application.job_queue
     if job_queue:
         job_queue.run_once(
@@ -289,7 +270,6 @@ def main():
 
     print("📡 Bot 已啟動，開始 polling 中...")
     application.run_polling()
-
 
 if __name__ == "__main__":
     main()
