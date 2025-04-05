@@ -25,22 +25,28 @@ command_descriptions = {
     "help": "顯示所有支援的指令與功能說明"
 }
 
+
 # === /help 指令 ===
 async def help_command(update: Update, context):
-    help_text = """✅ *E3A Bot 指令說明*
+    help_text = """✅ *E3A Bot Command Menu*
+
+Here are the available commands:
 
 """
     for cmd, desc in command_descriptions.items():
-        help_text += f"/{cmd} - {desc}\n"
+        help_text += f"/{cmd} — {desc}\n"
 
     help_text += """
 
-🔍 *關鍵字觸發：*
-- "gm", "gn", "早安", "晚安"、價格、合約等，都可觸發自動回覆
-- scam 關鍵字如 "空投"、"詐騙" 自動跳出安全警告
-- 自動轉發 EternalAI Twitter 新推文
+🔍 *Trigger Keywords:*
+- Auto replies to common phrases like: `"gm"`, `"gn"`, `"早安"`, `"晚安"`, `"價格"`, `"合約"`, `"price"` and more.
+- Detects scam words like `"空投"` / `"airdrop"` / `"詐騙"` and gives safety warnings.
+- Automatically forwards new tweets from EternalAI Twitter.
+
+Enjoy the bot and don’t forget to DYOR 🧠
 """
     await update.message.reply_text(help_text, parse_mode="Markdown")
+
 text_responses = {
     "gm": [
         "GM~ your message just turned on my happy mode! 🧡",
