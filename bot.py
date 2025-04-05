@@ -17,13 +17,14 @@ TOKEN = os.environ.get("BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
 E3A_ADDRESS = 'EKYotMbZR82JAVakfnaQbRfCE7oyWLsXVwfyjwTRdaos'
 CHAT_ID = os.environ.get("CHAT_ID", "-100xxxxxxxxxx")  # 替換為你的群組 chat_id
 HELIUS_KEY = os.environ.get("HELIUS_KEY", "your_helius_api_key")
-# === 指令描述表 for /help ===
+# === Command descriptions for /help ===
 command_descriptions = {
-    "faq": "常見問題與解答",
-    "stats": "顯示 E3A 即時資訊：價格、市值、持幣人數、合約",
-    "holders": "查看 E3A Token 的持幣地址數",
-    "help": "顯示所有支援的指令與功能說明"
+    "faq": "Frequently asked questions and answers",
+    "stats": "Show E3A live stats: price, market cap, holders, contract",
+    "holders": "Display E3A token holder count",
+    "help": "Show this command reference list"
 }
+
 
 
 # === /help 指令 ===
