@@ -17,7 +17,30 @@ TOKEN = os.environ.get("BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
 E3A_ADDRESS = 'EKYotMbZR82JAVakfnaQbRfCE7oyWLsXVwfyjwTRdaos'
 CHAT_ID = os.environ.get("CHAT_ID", "-100xxxxxxxxxx")  # 替換為你的群組 chat_id
 HELIUS_KEY = os.environ.get("HELIUS_KEY", "your_helius_api_key")
+# === 指令描述表 for /help ===
+command_descriptions = {
+    "faq": "常見問題與解答",
+    "stats": "顯示 E3A 即時資訊：價格、市值、持幣人數、合約",
+    "holders": "查看 E3A Token 的持幣地址數",
+    "help": "顯示所有支援的指令與功能說明"
+}
 
+# === /help 指令 ===
+async def help_command(update: Update, context):
+    help_text = """✅ *E3A Bot 指令說明*
+
+"""
+    for cmd, desc in command_descriptions.items():
+        help_text += f"/{cmd} - {desc}\n"
+
+    help_text += """
+
+🔍 *關鍵字觸發：*
+- "gm", "gn", "早安", "晚安"、價格、合約等，都可觸發自動回覆
+- scam 關鍵字如 "空投"、"詐騙" 自動跳出安全警告
+- 自動轉發 EternalAI Twitter 新推文
+"""
+    await update.message.reply_text(help_text, parse_mode="Markdown")
 text_responses = {
     "gm": [
         "GM~ your message just turned on my happy mode! 🧡",
