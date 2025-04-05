@@ -19,34 +19,36 @@ CHAT_ID = os.environ.get("CHAT_ID", "-100xxxxxxxxxx")  # 替換為你的群組 c
 HELIUS_KEY = os.environ.get("HELIUS_KEY", "your_helius_api_key")
 # === Command descriptions for /help ===
 command_descriptions = {
-    "faq": "Frequently asked questions and answers",
-    "stats": "Show E3A live stats: price, market cap, holders, contract",
-    "holders": "Display E3A token holder count",
-    "help": "Show this command reference list"
+    "faq": "Frequently Asked Questions",
+    "stats": "Display E3A live data: price, market cap, holders, contract",
+    "holders": "Check E3A Token's current holder count",
+    "help": "Show all supported commands and features"
 }
 
 
 
-# === /help 指令 ===
+
+# === /help command ===
 async def help_command(update: Update, context):
     help_text = """✅ *E3A Bot Command Menu*
 
 Here are the available commands:
-
 """
+
     for cmd, desc in command_descriptions.items():
-        help_text += f"/{cmd} — {desc}\n"
+        help_text += f"/{cmd} - {desc}\n"
 
     help_text += """
 
 🔍 *Trigger Keywords:*
-- Auto replies to common phrases like: `"gm"`, `"gn"`, `"早安"`, `"晚安"`, `"價格"`, `"合約"`, `"price"` and more.
-- Detects scam words like `"空投"` / `"airdrop"` / `"詐騙"` and gives safety warnings.
+- Auto replies to common phrases like: "gm", "gn", "good morning", "good night", "price", "contract", etc.
+- Detects scam-related words like "airdrop", "fakewallet", "scam", and issues safety warnings.
 - Automatically forwards new tweets from EternalAI Twitter.
 
 Enjoy the bot and don’t forget to DYOR 🧠
 """
     await update.message.reply_text(help_text, parse_mode="Markdown")
+
 
 text_responses = {
     "gm": [
