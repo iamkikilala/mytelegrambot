@@ -297,10 +297,17 @@ async def handle_message(update: Update, context):
         await update.message.reply_text("https://x.com/e3a_eternalai?s=21&t=nKJh8aBy_Qblb-XTWP-UpQ")
         return
 
-    for keyword, replies in text_responses.items():
-        if keyword in msg:
-            await update.message.reply_text(random.choice(replies))
+    import zhconv  # 一開始記得 import
+
+# ...
+
+    # === 問題關鍵字自動回覆 ===
+    msg_simplified = zhconv.convert(msg, 'zh-hans')  # 轉成簡體做比對
+    for keyword, reply in question_responses.items():
+        if keyword in msg_simplified:
+            await update.message.reply_text(reply)
             return
+
 
 # === 11. 主程式 ===
 def main():
