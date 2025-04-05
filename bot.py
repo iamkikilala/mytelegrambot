@@ -235,7 +235,7 @@ async def handle_message(update: Update, context):
         price, market_cap = get_e3a_price()
         if price:
             await update.message.reply_text(
-                f"📊 *E3A Token Info*\n\n"
+                f"📊 *E3A Token Info:*\n\n"
                 f"🔗 Contract: `{E3A_ADDRESS}`\n"
                 f"💰 Price: ${price}\n"
                 f"📈 Market Cap: ${market_cap:,} USD",
@@ -243,9 +243,6 @@ async def handle_message(update: Update, context):
             )
         else:
             await update.message.reply_text("Failed to fetch price data.")
-        return
-if any(x in msg for x in ["價格", "價錢", "price"]):
-        await get_price(update, context)
         return
 
     if any(k in msg for k in ["官網", "eternalai", "網站", "site", "網址"]):
