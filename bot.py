@@ -257,14 +257,27 @@ def main():
     print("🚀 Bot 正在啟動中...")
     application = ApplicationBuilder().token(TOKEN).build()
 
-    application.add_handler(CommandHandler("faq", faq))
-    application.add_handler(CommandHandler("stats", stats))
+    # 刪除 webhook，啟用 polling
+    application.bot.delete_webhook(drop_pending_updates=True)
+
+    # 添加文字處理器與指令處理器
+    application.add_handler(CommandHandler("price", get_price))
+    application.add_handler(CommandHandler("faq", handle_faq))
+    application.add_handler(CommandHandler("stats", handle_stats))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
-    application.job_queue.run_once(lambda ctx: asyncio.create_task(tweet_watcher(application)), when=1)
+    # 防 scam 模式：可以加入連結處理（如需）
+    application.add_handler(MessageHandler(filters.Entity("url"), scam_link_checker))
 
-    print("📡 Bot 開始運作！")
+    # ✅ 修正 JobQueue 問題（tweet watcher 啟動）
+    job_queue = application.job_queue
+    if job_queue:
+        job_queue.run_once(
+            lambda ctx: asyncio.create_task(tweet_watcher(application)),
+            when=1
+        )
+    else:
+        print("⚠️ JobQueue 尚未啟用，無法設置 tweet_watcher 任務。")
+
+    print("📡 Bot 已啟動，開始 polling 中...")
     application.run_polling()
-
-if __name__ == "__main__":
-    main()
