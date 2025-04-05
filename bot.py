@@ -256,20 +256,18 @@ async def handle_message(update: Update, context):
 def main():
     print("🚀 Bot 正在啟動中...")
     application = ApplicationBuilder().token(TOKEN).build()
-
-    # 刪除 webhook，啟用 polling
     application.bot.delete_webhook(drop_pending_updates=True)
 
-    # 添加文字處理器與指令處理器
+    # 指令
     application.add_handler(CommandHandler("price", get_price))
-    application.add_handler(CommandHandler("faq", handle_faq))
-    application.add_handler(CommandHandler("stats", handle_stats))
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    application.add_handler(CommandHandler("faq", faq))
+    application.add_handler(CommandHandler("stats", stats))
 
-    # 防 scam 模式：可以加入連結處理（如需）
+    # 文字訊息與 scam 偵測
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     application.add_handler(MessageHandler(filters.Entity("url"), scam_link_checker))
 
-    # ✅ 修正 JobQueue 問題（tweet watcher 啟動）
+    # 啟動 Tweet Watcher
     job_queue = application.job_queue
     if job_queue:
         job_queue.run_once(
@@ -281,3 +279,4 @@ def main():
 
     print("📡 Bot 已啟動，開始 polling 中...")
     application.run_polling()
+
