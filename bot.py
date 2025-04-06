@@ -223,14 +223,27 @@ def get_e3a_price():
 # === 5. 查持幣人數功能 ===
 def get_holder_count():
     try:
-        headers = {"accept": "application/json"}
-        url = f"https://api.helius.xyz/v0/token-metadata?api-key={HELIUS_KEY}&mint={E3A_ADDRESS}"
-        res = requests.get(url, headers=headers)
+        url = f"https://api.helius.xyz/v1/token-metadata?api-key={HELIUS_KEY}"
+        headers = {
+            "accept": "application/json",
+            "Content-Type": "application/json"
+        }
+        body = {
+            "mint": E3A_ADDRESS
+        }
+
+        res = requests.post(url, headers=headers, json=body)
+        print("Debug: Response status", res.status_code)
+
         data = res.json()
+        print("Debug: Response data", data)
+
         return data.get("holders", "N/A")
+
     except Exception as e:
         print("取得持幣人數失敗：", e)
         return "N/A"
+
 
 # === 自動轉發推特貼文（每 5 分鐘） ===
 LAST_TWEET_LINK = None
