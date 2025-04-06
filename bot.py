@@ -365,6 +365,42 @@ async def handle_message(update: Update, context):
         if keyword in msg:
             await update.message.reply_text(random.choice(replies))
             return
+# === 歡迎新成員功能 ===
+welcome_messages = [
+    "Welcome aboard, {name}! 🎉 Dive into the AI world with us.",
+    "Glad to have you here, {name}! Explore EternalAI 🌐",
+    "Hey {name}, welcome to the fam! 🚀 Let’s build the future.",
+    "Cheers {name}, you’ve just entered the smartest place on-chain 🧠",
+    "{name}, welcome! Make yourself at home 🤖",
+    "Wave hello to {name}! 👋 Another believer joins us.",
+    "Excited to see you here, {name}! 🫶",
+    "{name}, your journey to the moon begins here 🌕",
+    "Yo {name}! Plug into the network ⚡️",
+    "Warmest welcome, {name}! Coffee’s on the blockchain ☕",
+    "Brace yourself {name}, alpha lives here 💎",
+    "We’re lucky to have you, {name}! 💫",
+    "Another block, another friend. Welcome {name}! ⛓️",
+    "You made it, {name}! Hope you brought memes 😎",
+    "{name}, welcome to the revolution 🔥",
+    "Thanks for joining us, {name}! 🚀",
+    "{name}, unlock your E3A adventure 🗝️",
+    "Hey {name}, ready to explore on-chain AI? 🧬",
+    "Welcome {name}! Magic starts in /faq 🪄",
+    "Glad you’re here, {name}. Let’s vibe 🎶",
+]
+
+async def welcome_new_member(update: Update, context):
+    for user in update.chat_member.new_chat_members:
+        welcome_text = random.choice(welcome_messages).format(name=user.full_name)
+        links = "\n\n🔗 Useful links:\n" \
+                "🌐 Website: https://ai.eternalai.io/\n" \
+                "📄 Whitepaper: https://ai.eternalai.io/static/Helloword.pdf\n" \
+                "💬 Discord: https://discord.com/invite/ZM7EdkCHZP\n" \
+                "🐦 Twitter: https://x.com/e3a_eternalai"
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=f"{welcome_text}{links}"
+        )
 
 
 # === 11. 主程式 ===
@@ -378,7 +414,9 @@ def main():
     application.add_handler(CommandHandler("holders", holders))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    application.add_handler(ChatMemberHandler(welcome_new_member, ChatMemberHandler.CHAT_MEMBER))
 
+    
     job_queue = application.job_queue
     if job_queue:
         job_queue.run_once(
