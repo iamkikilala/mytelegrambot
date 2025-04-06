@@ -9,6 +9,8 @@ import zhconv
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
+from telegram.ext import ChatMemberHandler
+
 
 # === 載入環境變數 ===
 load_dotenv()
