@@ -541,22 +541,24 @@ async def verify_callback(update: Update, context):
         await query.answer("Verification failed or expired.", show_alert=True)
 
 
-# === 11. 主程式 ===
 def main():
     print("🚀 Bot 正在啟動中...")
     application = ApplicationBuilder().token(TOKEN).build()
     application.bot.delete_webhook(drop_pending_updates=True)
 
+    # 指令 handler
     application.add_handler(CommandHandler("faq", faq))
     application.add_handler(CommandHandler("stats", stats))
     application.add_handler(CommandHandler("holders", holders))
     application.add_handler(CommandHandler("info", info))  
     application.add_handler(CommandHandler("help", help_command))
+
+    # 處理訊息、驗證、歡迎詞
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     application.add_handler(CallbackQueryHandler(verify_callback))
-    application.add_handler(ChatMemberHandler(welcome_new_member, ChatMemberHandler.CHAT_MEMBER))application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome_new_member))
+    application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome_new_member))
 
-    
+    # 定時任務
     job_queue = application.job_queue
     if job_queue:
         job_queue.run_once(
@@ -568,6 +570,3 @@ def main():
 
     print("📡 Bot 已啟動，開始 polling 中...")
     application.run_polling()
-
-if __name__ == "__main__":
-    main()
