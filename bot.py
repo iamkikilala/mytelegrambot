@@ -497,7 +497,8 @@ def main():
 
     job_queue = app.job_queue
     if job_queue:
-        job_queue.run_once(lambda ctx: asyncio.create_task(tweet_watcher(app)), when=1)
+        job_queue.run_repeating(lambda ctx: asyncio.create_task(tweet_watcher(app)), interval=300, first=1)
+
 
     print("📡 Bot 已啟動，開始 polling 中...")
     app.run_polling()
