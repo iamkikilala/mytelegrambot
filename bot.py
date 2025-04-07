@@ -484,8 +484,6 @@ welcome_messages = [
     "Glad you’re here, {name}. Let’s vibe 🎶",
 ]
 
-pending_verifications = {}
-
 async def welcome_new_member(update: Update, context):
     for user in update.message.new_chat_members:
         welcome_text = random.choice(welcome_messages).format(name=user.full_name)
@@ -495,18 +493,12 @@ async def welcome_new_member(update: Update, context):
                 "💬 Discord: https://discord.com/invite/ZM7EdkCHZP\n" \
                 "🐦 Twitter: https://x.com/e3a_eternalai"
 
-        keyboard = InlineKeyboardMarkup.from_button(
-            InlineKeyboardButton("✅ Verify Me", callback_data=f"verify_{user.id}")
-        )
-
-        pending_verifications[user.id] = update.effective_chat.id
-
         await context.bot.send_message(
             chat_id=update.effective_chat.id,
-            text=f"{welcome_text}{links}\n\n⚠️ *Please verify to start chatting.*",
-            parse_mode="Markdown",
-            reply_markup=keyboard
+            text=f"{welcome_text}{links}",
+            parse_mode="Markdown"
         )
+
 
         # 限制權限
         await context.bot.restrict_chat_member(
@@ -550,6 +542,7 @@ def main():
     application.add_handler(CommandHandler("holders", holders))
     application.add_handler(CommandHandler("info", info))
     application.add_handler(CommandHandler("help", help_command))
+    application.add_handler(ChatMemberHandler(welcome_new_member, ChatMemberHandler.CHAT_MEMBER))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     
     # 定時任務
