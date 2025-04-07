@@ -6,11 +6,38 @@ import feedparser
 import asyncio
 import re
 import zhconv
-from dotenv import load_dotenv
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
-from telegram.ext import ChatMemberHandler
 
+from dotenv import load_dotenv
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.constants import ChatMemberStatus
+from telegram.ext import (
+    ApplicationBuilder,
+    CommandHandler,
+    MessageHandler,
+    ChatMemberHandler,
+    CallbackQueryHandler,
+    filters,
+)
+
+# === /info 指令 ===
+async def info(update: Update, context):
+    info_text = """📌 *E3A Community Info*
+
+Welcome to EternalAI — your on-chain AI soulmate.
+
+🔗 *Useful Links*  
+🌐 Website: [eternalai.io](https://ai.eternalai.io/)  
+📄 Whitepaper: [Read here](https://ai.eternalai.io/static/Helloword.pdf)  
+💬 Discord: [Join us](https://discord.com/invite/ZM7EdkCHZP)  
+🐦 Twitter: [Follow us](https://x.com/e3a_eternalai)  
+🛒 Buy Token: [DexScreener](https://dexscreener.com/solana/EKYotMbZR82JAVakfnaQbRfCE7oyWLsXVwfyjwTRdaos)
+
+📣 *What can I ask the bot?*  
+Ask about token stats, price, holders, links, and we’ll respond instantly. Or just type “gm”, “gn” for vibes.
+
+👀 New here? Try `/faq` or ask your first question.
+"""
+    await update.message.reply_text(info_text, parse_mode="Markdown")
 
 # === 載入環境變數 ===
 load_dotenv()
@@ -37,18 +64,18 @@ async def help_command(update: Update, context):
 Here are the available commands:
 """
 
-    for cmd, desc in command_descriptions.items():
+    for cmd, desc in {
+        "faq": "Frequently Asked Questions",
+        "stats": "Display E3A live data: price, market cap, holders, contract",
+        "holders": "Check E3A Token's current holder count",
+        "info": "Show community links, whitepaper, and where to buy",
+        "help": "Show all supported commands and features"
+    }.items():
         help_text += f"/{cmd} - {desc}\n"
 
-    help_text += """
+    help_text += """\n
+🔍 
 
-🔍 *Trigger Keywords:*
-- Auto replies to common phrases like: "gm", "gn", "good morning", "good night", "price", "contract", etc.
-- Detects scam-related words like "airdrop", "fakewallet", "scam", and issues safety warnings.
-- Automatically forwards new tweets from EternalAI Twitter.
-
-Enjoy the bot and don’t forget to DYOR 🧠
-"""
     await update.message.reply_text(help_text, parse_mode="Markdown")
 
 
@@ -308,6 +335,74 @@ async def stats(update: Update, context):
         )
     else:
         await update.message.reply_text("Failed to fetch stats.")
+# === 情緒偵測與推薦閱讀 ===
+async def emotion_response(msg):
+    lower = zhconv.convert(msg.lower(), 'zh-hans')  # 自動轉為簡體比較統一比較判斷
+    if any(keyword in lower for keyword in [
+        "崩潰", "不行了", "想放棄", "虧爆", "跌爛", "爆倉", "被套", "好想賣", "心態炸了",
+        "亏爆", "跌烂", "爆仓", "被套", "好想卖", "心态炸了",
+        "割肉", "崩了", "慘了", "赔惨了", "赔光", "赔钱", "心累", "心很累",
+        "爆掉了", "跌爛了", "跌到懷疑人生", "一直虧", "虧到不想看"]):
+        return random.choice([
+            "😔 Looks like you're having a rough time. Here's something inspiring: https://ai.eternalai.io/blog",
+            "💪 Even the strongest fall. Rise again: https://ai.eternalai.io/blog",
+            "🌱 Growth comes from struggle. You're not alone.",
+            "🧠 Take a breath. Reset. Try again — you’ve got this!",
+            "🔥 You’ve made it this far, don’t stop now.",
+            "🎯 Challenges mean you're aiming high. Keep pushing.",
+            "🌄 Every dip is just the start of a comeback story.",
+            "🚀 The dip before the pump. Hang in there.",
+            "🔁 It’s okay to rest. Just don’t quit.",
+            "🤖 One bug at a time. You're debugging life.",
+            "👀 Take a break, look again tomorrow.",
+            "⚡️ Recharge. You're a human battery, not a bot.",
+            "🫂 Even AI gets overwhelmed. You're doing fine.",
+            "💬 Chat with the community — they get it.",
+            "🎶 Maybe it's time for some music and memes.",
+            "💡 You're closer than you think. Keep going.",
+            "🧭 The future isn’t built in one night.",
+            "🐋 Even whales start small.",
+            "🍀 Some things take time to bloom.",
+            "📈 This is just a dip. Zoom out.",
+            "🎮 This level is hard, but it’s not game over.",
+            "⏳ One more block, one more chance.",
+            "🎁 Sometimes the best gifts come after the hardest waits.",
+            "🧘 Calm is a skill. Practice it.",
+            "✨ Your presence already matters.",
+            "🏗️ Rome wasn’t built in a bull run either.",
+            "🚧 Today is hard, but not forever.",
+            "🌙 Even the moon has phases.",
+            "💎 Your strength is rarer than you think.",
+            "📚 Check out our blog — you might just find what you need: https://ai.eternalai.io/blog",
+            "🔗 Struggles now, stories later. You're in the middle of the good part.",
+            "🛠 Every setback is setup for a greater leap.",
+            "📦 Pack your emotions, we’re going up again soon.",
+            "💭 Even Satoshi had doubts. You’re doing fine."
+        ])
+    if any(keyword in lower for keyword in ["看不懂", "太難", "複雜", "不會買", "新手", "怎麼買", "怎麽買"]):
+        return "📘 Need help? Start with the whitepaper: https://ai.eternalai.io/static/Helloword.pdf"
+    if any(keyword in lower for keyword in ["沒希望", "完了", "沒救", "涼了", "歸零", "归零", "死了", "涼涼"]):
+        return "🌈 Don't lose hope. Check our roadmap and community strength: https://ai.eternalai.io"
+    if any(keyword in lower for keyword in [
+        "可以買嗎", "能上車嗎", "要不要買", "能買嗎", "all in", "買不買",
+        "可以买吗", "能上车吗", "要不要买", "能买吗", "买不买",
+        "能不能買", "進場時機", "還能上車", "補倉", "進不進場", "加倉", "再買點", "還來得及嗎",
+        "能不能买", "进场时机", "还能上车", "加仓", "再买点", "还来得及吗"]):
+        return random.choice([
+            "🧠 Remember to DYOR (Do Your Own Research). Start here: https://ai.eternalai.io",
+            "📊 Price is temporary, conviction is forever.",
+            "🔍 Not financial advice, but have you seen our whitepaper? https://ai.eternalai.io/static/Helloword.pdf",
+            "💸 Only invest what you’re willing to lose. And then double check that.",
+            "🙃 The best time to buy was yesterday. The second best time is after thinking twice.",
+            "👁️ Zoom out. Long-term vision always wins.",
+            "🤝 Join the discussion, not just the chart.",
+            "🧭 Ask yourself why you're here — then decide.",
+            "🎢 Emotions run high in crypto. Logic runs long.",
+            "🤔 Are you chasing pumps or building conviction?",
+            "🛑 Think. Feel. Then maybe act.",
+            "📈 Hype fades. Vision stays."
+        ])
+    return None
 
 # === 10. 處理訊息 ===
 import re
@@ -367,7 +462,7 @@ async def handle_message(update: Update, context):
         if keyword in msg:
             await update.message.reply_text(random.choice(replies))
             return
-# === 歡迎新成員功能 ===
+# === 歡迎詞與驗證 ===
 welcome_messages = [
     "Welcome aboard, {name}! 🎉 Dive into the AI world with us.",
     "Glad to have you here, {name}! Explore EternalAI 🌐",
@@ -391,6 +486,8 @@ welcome_messages = [
     "Glad you’re here, {name}. Let’s vibe 🎶",
 ]
 
+pending_verifications = {}
+
 async def welcome_new_member(update: Update, context):
     for user in update.chat_member.new_chat_members:
         welcome_text = random.choice(welcome_messages).format(name=user.full_name)
@@ -399,11 +496,47 @@ async def welcome_new_member(update: Update, context):
                 "📄 Whitepaper: https://ai.eternalai.io/static/Helloword.pdf\n" \
                 "💬 Discord: https://discord.com/invite/ZM7EdkCHZP\n" \
                 "🐦 Twitter: https://x.com/e3a_eternalai"
-        await context.bot.send_message(
-            chat_id=update.effective_chat.id,
-            text=f"{welcome_text}{links}"
+
+        keyboard = InlineKeyboardMarkup.from_button(
+            InlineKeyboardButton("✅ Verify Me", callback_data=f"verify_{user.id}")
         )
 
+        pending_verifications[user.id] = update.effective_chat.id
+
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=f"{welcome_text}{links}\n\n⚠️ *Please verify to start chatting.*",
+            parse_mode="Markdown",
+            reply_markup=keyboard
+        )
+
+        # Restrict permissions until verification
+        await context.bot.restrict_chat_member(
+            chat_id=update.effective_chat.id,
+            user_id=user.id,
+            permissions={"can_send_messages": False}
+        )
+
+async def verify_callback(update: Update, context):
+    query = update.callback_query
+    user_id = query.from_user.id
+
+    if query.data == f"verify_{user_id}" and user_id in pending_verifications:
+        chat_id = pending_verifications.pop(user_id)
+        await context.bot.restrict_chat_member(
+            chat_id=chat_id,
+            user_id=user_id,
+            permissions={
+                "can_send_messages": True,
+                "can_send_media_messages": True,
+                "can_send_other_messages": True,
+                "can_add_web_page_previews": True
+            }
+        )
+        await query.answer("Verification successful! You can now chat.")
+        await query.edit_message_text("✅ Verified! Welcome aboard.")
+    else:
+        await query.answer("Verification failed or expired.", show_alert=True)
 
 # === 11. 主程式 ===
 def main():
@@ -416,6 +549,7 @@ def main():
     application.add_handler(CommandHandler("holders", holders))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    application.add_handler(CallbackQueryHandler(verify_user))
     application.add_handler(ChatMemberHandler(welcome_new_member, ChatMemberHandler.CHAT_MEMBER))
 
     
