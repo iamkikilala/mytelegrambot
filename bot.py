@@ -8,16 +8,14 @@ import re
 import zhconv
 
 from dotenv import load_dotenv
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatPermissions
-from telegram.constants import ChatMemberStatus
+from telegram import Update
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
     MessageHandler,
-    ChatMemberHandler,
-    CallbackQueryHandler,
     filters,
 )
+
 
 # === /info 指令 ===
 async def info(update: Update, context):
@@ -541,19 +539,19 @@ async def verify_callback(update: Update, context):
         await query.answer("Verification failed or expired.", show_alert=True)
 
 
+# === 主程式 ===
 def main():
     print("🚀 Bot 正在啟動中...")
     application = ApplicationBuilder().token(TOKEN).build()
     application.bot.delete_webhook(drop_pending_updates=True)
+
     application.add_handler(CommandHandler("faq", faq))
     application.add_handler(CommandHandler("stats", stats))
     application.add_handler(CommandHandler("holders", holders))
-    application.add_handler(CommandHandler("info", info))  
+    application.add_handler(CommandHandler("info", info))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    application.add_handler(CallbackQueryHandler(verify_callback))
-    application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome_new_member))
-
+    
     # 定時任務
     job_queue = application.job_queue
     if job_queue:
