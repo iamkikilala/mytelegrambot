@@ -1,4 +1,4 @@
-# === 1. 載入必要套件 ===
+# === 1. 套件載入 ===
 import os
 import random
 import requests
@@ -6,17 +6,15 @@ import feedparser
 import asyncio
 import re
 import zhconv
-
 from dotenv import load_dotenv
-from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, ChatPermissions
+from telegram import Update
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
     MessageHandler,
-    filters,
     ChatMemberHandler,
+    filters,
 )
-
 # === /info 指令 ===
 async def info(update: Update, context):
     info_text = """📌 *E3A Community Info*
@@ -400,9 +398,22 @@ async def emotion_response(msg):
         ])
     return None
 
-# === 10. 處理訊息 ===
+# ===  處理訊息 ===
 import re
 import zhconv  # 放最上面 imports 一起
+
+# === 新人歡迎詞 ===
+welcome_messages = [
+    "Welcome aboard, {name}! 🎉 Dive into the AI world with us.",
+    "Hey {name}, welcome to the fam! 🚀 Let’s build the future.",
+    "{name}, your journey to the moon begins here 🌕",
+]
+async def welcome_new_member(update: Update, context):
+    for user in update.message.new_chat_members:
+        text = random.choice(welcome_messages).format(name=user.full_name)
+        links = "\n\n🔗 Useful links:\n🌐 https://ai.eternalai.io/\n📄 https://ai.eternalai.io/static/Helloword.pdf\n💬 https://discord.com/invite/ZM7EdkCHZP\n🐦 https://x.com/e3a_eternalai"
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=f"{text}{links}", parse_mode="Markdown")
+
 
 # === 處理訊息 ===
 async def handle_message(update: Update, context):
@@ -460,102 +471,28 @@ async def handle_message(update: Update, context):
             return
 from telegram import ChatPermissions
 
-# === 歡迎詞與驗證 ===
-welcome_messages = [
-    "Welcome aboard, {name}! 🎉 Dive into the AI world with us.",
-    "Glad to have you here, {name}! Explore EternalAI 🌐",
-    "Hey {name}, welcome to the fam! 🚀 Let’s build the future.",
-    "Cheers {name}, you’ve just entered the smartest place on-chain 🧠",
-    "{name}, welcome! Make yourself at home 🤖",
-    "Wave hello to {name}! 👋 Another believer joins us.",
-    "Excited to see you here, {name}! 🫶",
-    "{name}, your journey to the moon begins here 🌕",
-    "Yo {name}! Plug into the network ⚡️",
-    "Warmest welcome, {name}! Coffee’s on the blockchain ☕",
-    "Brace yourself {name}, alpha lives here 💎",
-    "We’re lucky to have you, {name}! 💫",
-    "Another block, another friend. Welcome {name}! ⛓️",
-    "You made it, {name}! Hope you brought memes 😎",
-    "{name}, welcome to the revolution 🔥",
-    "Thanks for joining us, {name}! 🚀",
-    "{name}, unlock your E3A adventure 🗝️",
-    "Hey {name}, ready to explore on-chain AI? 🧬",
-    "Welcome {name}! Magic starts in /faq 🪄",
-    "Glad you’re here, {name}. Let’s vibe 🎶",
-]
 
-async def welcome_new_member(update: Update, context):
-    for user in update.message.new_chat_members:
-        welcome_text = random.choice(welcome_messages).format(name=user.full_name)
-        links = "\n\n🔗 Useful links:\n" \
-                "🌐 Website: https://ai.eternalai.io/\n" \
-                "📄 Whitepaper: https://ai.eternalai.io/static/Helloword.pdf\n" \
-                "💬 Discord: https://discord.com/invite/ZM7EdkCHZP\n" \
-                "🐦 Twitter: https://x.com/e3a_eternalai"
-
-        keyboard = InlineKeyboardMarkup.from_button(
-            InlineKeyboardButton("✅ Verify Me", callback_data=f"verify_{user.id}")
-        )
-
-        pending_verifications[user.id] = update.effective_chat.id
-
-        await context.bot.send_message(
-            chat_id=update.effective_chat.id,
-            text=f"{welcome_text}{links}\n\n⚠️ *Please verify to start chatting.*",
-            parse_mode="Markdown",
-            reply_markup=keyboard
-        )
-
-        await context.bot.restrict_chat_member(
-            chat_id=update.effective_chat.id,
-            user_id=user.id,
-            permissions=ChatPermissions(can_send_messages=False)
-        )
-
-async def verify_callback(update: Update, context):
-    query = update.callback_query
-    user_id = query.from_user.id
-    if query.data == f"verify_{user_id}" and user_id in pending_verifications:
-        chat_id = pending_verifications.pop(user_id)
-        await context.bot.restrict_chat_member(
-            chat_id=chat_id,
-            user_id=user_id,
-            permissions=ChatPermissions(
-                can_send_messages=True,
-                can_send_media_messages=True,
-                can_send_other_messages=True,
-                can_add_web_page_previews=True
-            )
-        )
-        await query.answer("Verification successful! You can now chat.")
-        await query.edit_message_text("✅ Verified! Welcome aboard.")
-    else:
-        await query.answer("Verification failed or expired.", show_alert=True)
 
 # === 主程式 ===
 def main():
     print("🚀 Bot 正在啟動中...")
-    application = ApplicationBuilder().token(TOKEN).build()
-    application.bot.delete_webhook(drop_pending_updates=True)
+    app = ApplicationBuilder().token(TOKEN).build()
+    app.bot.delete_webhook(drop_pending_updates=True)
 
-    application.add_handler(CommandHandler("faq", faq))
-    application.add_handler(CommandHandler("stats", stats))
-    application.add_handler(CommandHandler("holders", holders))
-    application.add_handler(CommandHandler("info", info))
-    application.add_handler(CommandHandler("help", help_command))
-    application.add_handler(ChatMemberHandler(welcome_new_member, ChatMemberHandler.CHAT_MEMBER))
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome_new_member))
+    app.add_handler(CommandHandler("info", info))
+    app.add_handler(CommandHandler("help", help_command))
+    app.add_handler(CommandHandler("faq", faq))
+    app.add_handler(CommandHandler("stats", stats))
+    app.add_handler(CommandHandler("holders", holders))
+    app.add_handler(ChatMemberHandler(welcome_new_member, ChatMemberHandler.CHAT_MEMBER))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
-    # 定時任務
-    job_queue = application.job_queue
+    job_queue = app.job_queue
     if job_queue:
-        job_queue.run_once(
-            lambda ctx: asyncio.create_task(tweet_watcher(application)),
-            when=1
-        )
-    else:
-        print("⚠️ JobQueue 尚未啟用，無法設置 tweet_watcher 任務。")
+        job_queue.run_once(lambda ctx: asyncio.create_task(tweet_watcher(app)), when=1)
 
     print("📡 Bot 已啟動，開始 polling 中...")
-    application.run_polling()
+    app.run_polling()
+
+if __name__ == '__main__':
+    main()
