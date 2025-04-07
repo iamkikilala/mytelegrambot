@@ -23,7 +23,7 @@ Welcome to EternalAI — your on-chain AI soulmate.
 
 🔗 *Useful Links*  
 🌐 Website: [eternalai.io](https://ai.eternalai.io/)  
-📄 Whitepaper: [Read here](https://ai.eternalai.io/static/Helloword.pdf)  
+📄 Whitepaper: [Read here](https://ai.eternalai.io/static/Helloworld.pdf)  
 💬 Discord: [Join us](https://discord.com/invite/ZM7EdkCHZP)  
 🐦 Twitter: [Follow us](https://x.com/e3a_eternalai)  
 🛒 Buy Token: [DexScreener](https://dexscreener.com/solana/EKYotMbZR82JAVakfnaQbRfCE7oyWLsXVwfyjwTRdaos)
