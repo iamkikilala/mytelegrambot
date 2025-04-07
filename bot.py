@@ -73,8 +73,18 @@ Here are the available commands:
     }.items():
         help_text += f"/{cmd} - {desc}\n"
 
-    help_text += """\n
-🔍 
+        help_text += """
+
+🔍 *Trigger Keywords:*  
+- Auto replies to common phrases like: "gm", "gn", "price", "contract", etc.  
+- Emotion detection: Try saying "崩潰"  
+- Scam detection: flags words like "airdrop", "詐騙", "空投"  
+- Follows EternalAI tweets and community updates  
+
+📘 Need more? Try `/info`
+"""
+
+    await update.message.reply_text(help_text, parse_mode="Markdown")
 
     await update.message.reply_text(help_text, parse_mode="Markdown")
 
@@ -547,9 +557,10 @@ def main():
     application.add_handler(CommandHandler("faq", faq))
     application.add_handler(CommandHandler("stats", stats))
     application.add_handler(CommandHandler("holders", holders))
+    application.add_handler(CommandHandler("info", info))  
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    application.add_handler(CallbackQueryHandler(verify_user))
+    application.add_handler(CallbackQueryHandler(verify_callback))
     application.add_handler(ChatMemberHandler(welcome_new_member, ChatMemberHandler.CHAT_MEMBER))
 
     
