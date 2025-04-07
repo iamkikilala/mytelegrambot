@@ -8,7 +8,7 @@ import re
 import zhconv
 
 from dotenv import load_dotenv
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatPermissions
 from telegram.constants import ChatMemberStatus
 from telegram.ext import (
     ApplicationBuilder,
@@ -460,6 +460,8 @@ async def handle_message(update: Update, context):
         if keyword in msg:
             await update.message.reply_text(random.choice(replies))
             return
+from telegram import ChatPermissions
+
 # === 歡迎詞與驗證 ===
 welcome_messages = [
     "Welcome aboard, {name}! 🎉 Dive into the AI world with us.",
@@ -487,7 +489,7 @@ welcome_messages = [
 pending_verifications = {}
 
 async def welcome_new_member(update: Update, context):
-    for user in update.chat_member.new_chat_members:
+    for user in update.message.new_chat_members:
         welcome_text = random.choice(welcome_messages).format(name=user.full_name)
         links = "\n\n🔗 Useful links:\n" \
                 "🌐 Website: https://ai.eternalai.io/\n" \
@@ -508,11 +510,11 @@ async def welcome_new_member(update: Update, context):
             reply_markup=keyboard
         )
 
-        # Restrict permissions until verification
+        # 限制權限
         await context.bot.restrict_chat_member(
             chat_id=update.effective_chat.id,
             user_id=user.id,
-            permissions={"can_send_messages": False}
+            permissions=ChatPermissions(can_send_messages=False)
         )
 
 async def verify_callback(update: Update, context):
@@ -521,20 +523,23 @@ async def verify_callback(update: Update, context):
 
     if query.data == f"verify_{user_id}" and user_id in pending_verifications:
         chat_id = pending_verifications.pop(user_id)
+
         await context.bot.restrict_chat_member(
             chat_id=chat_id,
             user_id=user_id,
-            permissions={
-                "can_send_messages": True,
-                "can_send_media_messages": True,
-                "can_send_other_messages": True,
-                "can_add_web_page_previews": True
-            }
+            permissions=ChatPermissions(
+                can_send_messages=True,
+                can_send_media_messages=True,
+                can_send_other_messages=True,
+                can_add_web_page_previews=True
+            )
         )
+
         await query.answer("Verification successful! You can now chat.")
         await query.edit_message_text("✅ Verified! Welcome aboard.")
     else:
         await query.answer("Verification failed or expired.", show_alert=True)
+
 
 # === 11. 主程式 ===
 def main():
@@ -549,7 +554,7 @@ def main():
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     application.add_handler(CallbackQueryHandler(verify_callback))
-    application.add_handler(ChatMemberHandler(welcome_new_member, ChatMemberHandler.CHAT_MEMBER))
+    application.add_handler(ChatMemberHandler(welcome_new_member, ChatMemberHandler.CHAT_MEMBER))application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome_new_member))
 
     
     job_queue = application.job_queue
