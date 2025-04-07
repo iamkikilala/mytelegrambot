@@ -545,15 +545,11 @@ def main():
     print("🚀 Bot 正在啟動中...")
     application = ApplicationBuilder().token(TOKEN).build()
     application.bot.delete_webhook(drop_pending_updates=True)
-
-    # 指令 handler
     application.add_handler(CommandHandler("faq", faq))
     application.add_handler(CommandHandler("stats", stats))
     application.add_handler(CommandHandler("holders", holders))
     application.add_handler(CommandHandler("info", info))  
     application.add_handler(CommandHandler("help", help_command))
-
-    # 處理訊息、驗證、歡迎詞
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     application.add_handler(CallbackQueryHandler(verify_callback))
     application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome_new_member))
