@@ -8,14 +8,14 @@ import re
 import zhconv
 
 from dotenv import load_dotenv
-from telegram import Update
+from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, ChatPermissions
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
     MessageHandler,
     filters,
+    ChatMemberHandler,
 )
-
 
 # === /info 指令 ===
 async def info(update: Update, context):
@@ -493,14 +493,19 @@ async def welcome_new_member(update: Update, context):
                 "💬 Discord: https://discord.com/invite/ZM7EdkCHZP\n" \
                 "🐦 Twitter: https://x.com/e3a_eternalai"
 
-        await context.bot.send_message(
-            chat_id=update.effective_chat.id,
-            text=f"{welcome_text}{links}",
-            parse_mode="Markdown"
+        keyboard = InlineKeyboardMarkup.from_button(
+            InlineKeyboardButton("✅ Verify Me", callback_data=f"verify_{user.id}")
         )
 
+        pending_verifications[user.id] = update.effective_chat.id
 
-        # 限制權限
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=f"{welcome_text}{links}\n\n⚠️ *Please verify to start chatting.*",
+            parse_mode="Markdown",
+            reply_markup=keyboard
+        )
+
         await context.bot.restrict_chat_member(
             chat_id=update.effective_chat.id,
             user_id=user.id,
@@ -510,10 +515,8 @@ async def welcome_new_member(update: Update, context):
 async def verify_callback(update: Update, context):
     query = update.callback_query
     user_id = query.from_user.id
-
     if query.data == f"verify_{user_id}" and user_id in pending_verifications:
         chat_id = pending_verifications.pop(user_id)
-
         await context.bot.restrict_chat_member(
             chat_id=chat_id,
             user_id=user_id,
@@ -524,12 +527,10 @@ async def verify_callback(update: Update, context):
                 can_add_web_page_previews=True
             )
         )
-
         await query.answer("Verification successful! You can now chat.")
         await query.edit_message_text("✅ Verified! Welcome aboard.")
     else:
         await query.answer("Verification failed or expired.", show_alert=True)
-
 
 # === 主程式 ===
 def main():
@@ -544,7 +545,8 @@ def main():
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(ChatMemberHandler(welcome_new_member, ChatMemberHandler.CHAT_MEMBER))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    
+    application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome_new_member))
+
     # 定時任務
     job_queue = application.job_queue
     if job_queue:
