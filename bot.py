@@ -329,6 +329,7 @@ async def stats(update: Update, context):
         )
     else:
         await update.message.reply_text("Failed to fetch stats.")
+
 # === 情緒偵測與推薦閱讀 ===
 async def emotion_response(msg):
     lower = zhconv.convert(msg.lower(), 'zh-hans')  # 自動轉為簡體比較統一比較判斷
@@ -445,7 +446,7 @@ async def handle_message(update: Update, context):
         await update.message.reply_text("https://ai.eternalai.io/")
         return
     if any(k in msg for k in ["白皮書", "paper", "whitepaper"]):
-        await update.message.reply_text("https://ai.eternalai.io/static/Helloword.pdf")
+        await update.message.reply_text("https://ai.eternalai.io/static/Helloworld.pdf")
         return
     if any(k in msg for k in ["discord", "dc"]):
         await update.message.reply_text("https://discord.com/invite/ZM7EdkCHZP")
@@ -463,6 +464,13 @@ async def handle_message(update: Update, context):
         if re.search(keyword, msg_simplified):
             await update.message.reply_text(reply)
             return
+   
+    # === 情緒性關鍵字偵測 ===
+    emotion_reply = await emotion_response(msg)
+    if emotion_reply:
+        await update.message.reply_text(emotion_reply)
+        return
+
 
     # === 早安晚安等關鍵詞詞庫 ===
     for keyword, replies in text_responses.items():
