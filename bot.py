@@ -59,34 +59,22 @@ command_descriptions = {
 
 # === /help command ===
 async def help_command(update: Update, context):
-    help_text = """✅ *E3A Bot Command Menu*
+    help_text = """✅ *E3A Bot Command Menu*\n\nHere are the available commands:\n"""
 
-Here are the available commands:
-"""
-
-    for cmd, desc in {
+    commands = {
         "faq": "Frequently Asked Questions",
         "stats": "Display E3A live data: price, market cap, holders, contract",
         "holders": "Check E3A Token's current holder count",
         "info": "Show community links, whitepaper, and where to buy",
         "help": "Show all supported commands and features"
-    }.items():
+    }
+
+    for cmd, desc in commands.items():
         help_text += f"/{cmd} - {desc}\n"
 
-        help_text += """
-
-🔍 *Trigger Keywords:*  
-- Auto replies to common phrases like: "gm", "gn", "price", "contract", etc.  
-- Emotion detection: Try saying "崩潰"  
-- Scam detection: flags words like "airdrop", "詐騙", "空投"  
-- Follows EternalAI tweets and community updates  
-
-📘 Need more? Try `/info`
-"""
-
     await update.message.reply_text(help_text, parse_mode="Markdown")
 
-    await update.message.reply_text(help_text, parse_mode="Markdown")
+   
 
 
 text_responses = {
