@@ -93,7 +93,6 @@ Here are the available commands:
 /info - Show community info & links
 /help - Show all supported commands
 /faq - Frequently Asked Questions
-/stats - Show E3A Token price & market cap
 """
     await update.message.reply_text(help_text, parse_mode="Markdown")
 
