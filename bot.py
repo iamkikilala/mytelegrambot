@@ -171,7 +171,7 @@ def main():
     app.add_handler(CommandHandler("info", info))
     app.add_handler(CommandHandler("help", help_command))
     app.add_handler(CommandHandler("faq", faq))
-        app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
     job_queue = app.job_queue
     if job_queue:
