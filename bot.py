@@ -15,7 +15,16 @@ from telegram.ext import (
     ChatMemberHandler,
     filters,
 )
-# === /info 指令 ===
+
+# === 載入環境變數 ===
+load_dotenv()
+
+TOKEN = os.environ.get("BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
+E3A_ADDRESS = 'EKYotMbZR82JAVakfnaQbRfCE7oyWLsXVwfyjwTRdaos'
+CHAT_ID = os.environ.get("CHAT_ID", "-100xxxxxxxxxx")
+
+
+# === info 指令 ===
 async def info(update: Update, context):
     info_text = """📌 *E3A Community Info*
 
@@ -29,208 +38,12 @@ Welcome to EternalAI — your on-chain AI soulmate.
 🛒 Buy Token: [DexScreener](https://dexscreener.com/solana/EKYotMbZR82JAVakfnaQbRfCE7oyWLsXVwfyjwTRdaos)
 
 📣 *What can I ask the bot?*  
-Ask about token stats, price, holders, links, and we’ll respond instantly. Or just type “gm”, “gn” for vibes.
+Ask about token stats, price, holders, links, and we’ll respond instantly.
 
 👀 New here? Try `/faq` or ask your first question.
 """
     await update.message.reply_text(info_text, parse_mode="Markdown")
 
-# === 載入環境變數 ===
-load_dotenv()
-
-TOKEN = os.environ.get("BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
-E3A_ADDRESS = 'EKYotMbZR82JAVakfnaQbRfCE7oyWLsXVwfyjwTRdaos'
-CHAT_ID = os.environ.get("CHAT_ID", "-100xxxxxxxxxx")  # 替換為你的群組 chat_id
-HELIUS_KEY = os.environ.get("HELIUS_KEY", "your_helius_api_key")
-# === Command descriptions for /help ===
-command_descriptions = {
-    "faq": "Frequently Asked Questions",
-    "stats": "Display E3A live data: price, market cap, holders, contract",
-    "holders": "Check E3A Token's current holder count",
-    "help": "Show all supported commands and features"
-}
-
-
-
-
-# === /help command ===
-async def help_command(update: Update, context):
-    help_text = """✅ *E3A Bot Command Menu*\n\nHere are the available commands:\n"""
-
-    commands = {
-        "faq": "Frequently Asked Questions",
-        "stats": "Display E3A live data: price, market cap, holders, contract",
-        "holders": "Check E3A Token's current holder count",
-        "info": "Show community links, whitepaper, and where to buy",
-        "help": "Show all supported commands and features"
-    }
-
-    for cmd, desc in commands.items():
-        help_text += f"/{cmd} - {desc}\n"
-
-    await update.message.reply_text(help_text, parse_mode="Markdown")
-
-   
-
-
-text_responses = {
-    "gm": [
-        "GM~ your message just turned on my happy mode! 🧡",
-        "GM! Ready to slay the day 🚀",
-        "GM~ don’t forget to smile today 😊",
-        "GM~ let’s stay supercharged today ⚡️",
-        "Good morning… booting brain… loading… please wait… 😅",
-        "I’m up. Time to conquer the world. 🌎",
-        "Wishing you a day wrapped in sunshine and smiles 😻",
-        "Rise n' shine, web3 warrior! ☀️",
-        "Good mooooorning, code monkey 🐵",
-        "Wake up, sleepy blockchain hero! 🛌",
-        "Your gm unlocked 3 serotonin points ☕",
-        "Morning bytes received successfully 💾",
-        "You survived the night again. Congrats. 🧟",
-        "New day, same chaos. Let’s go! 💥",
-        "Here’s your GM. Use it wisely. 🧠"
-    ],
-    "gn": [
-        "GN~ the moon’s on babysitting duty tonight 🌚",
-        "Rest well, tomorrow’s you is gonna glow brighter 🙌",
-        "GN~ you did great today, proud of you 😌",
-        "GN~ hope life didn’t hit too hard today 🩵",
-        "Eyes shutting down… brain offline… see ya in dreamland… 😴",
-        "Dream sweet, don’t let the bugs bite 🐛",
-        "GN lil crypto potato 🥔💤",
-        "Sleep mode: ON. Responsiveness: 0% 💤",
-        "Nighty night, gas fees are lower anyway 🌌",
-        "Time to recharge your mental battery 🔋",
-        "Offline until further notice. Goodnight ✨",
-        "Shut down sequence initiated... GN 🌙",
-        "Logging off from reality 🛏️",
-        "Sending you sweet dreams on-chain 🌠",
-        "Tomorrow is another coin flip 🪙"
-    ],
-    "早安": [
-        "早啊！新的一天開始囉 🌞",
-        "早安～今天也要閃閃發光 ✨",
-        "早安你好～願你今天順順利利 🐣",
-        "嘿！早上好，元氣滿滿地出發吧 💪",
-        "別忘了打卡發光哦 ✨",
-        "今天的天氣：適合賺錢 ☀️",
-        "咖啡已就位，你呢？ ☕",
-        "打開眼睛就是勝利的一天 ✨",
-        "你醒了？世界好像開始動了 🌀",
-        "祝你早上可愛，下午厲害 💃"
-        "新的一天，新的 bug！🤦",
-        "你比太陽還早起，了不起！🥳",
-        "連夢都捨不得你醒，太可愛啦 😚",
-        "早晨就像你的臉一樣明亮（？）🌞",
-        "打開窗，吸一口元氣空氣！🌿",
-        "今天有你就很閃亮！💫",
-        "早安！今天是勇敢小天使日！🪖",
-        "來～早安魔法傳送給你 ✨",
-        "別讓鬧鐘白叫了，起床發光！🚗",
-        "打卡人生，從早安開始！💼"
-    ],
-    "晚安": [
-        "蓋好棉被，作個美夢 🛌",
-        "晚安囉～辛苦一天了 ✨",
-        "晚安晚安～記得放鬆 🌙",
-        "洗洗睡吧，明天會更好 🌟",
-        "放下手機，你值得好眠 📴",
-        "今晚就讓靈魂放個假吧 💤",
-        "夢裡也要記得笑 😊",
-        "明天再繼續發光 ✨",
-        "你今天超棒，晚安勇者 💪",
-        "世界太吵，夢裡我們自己決定 🎧",
-        "夜深了，快去當夢境的主角 🛌",
-        "刷牙+棉被=超級傳送門 🛎️",
-        "今晚的星星為你閃閃發光 ✨",
-        "願你夢見100倍幣 🪙",
-        "今天的你，值得五星級好夢 ⭐",
-        "放空 + 發呆 + zzz 模式啟動 🧦",
-        "夢裡我會繼續陪你吐槽人生 🤪",
-        "讓疲憊像殭屍一樣爛掉吧 🦜",
-        "晚安～記得對自己說聲辛苦了！🤍",
-        "睡眠任務已接收，準備執行！😷"
-],
-     "早上好": [  
-         "早上好哇！今天會發光 ✨",
-         "一起元氣出發吧！ 🚗",
-         "你是今天的限量閃亮星 🌟",
-         "打開眼睛，收下宇宙的祝福 🌼",
-         "喂～你是不是還在床上？快醒醒！😭",
-         "陽光曬屁股啦！🌞",
-         "早上好，今天準備登場了嗎？ 🌈",
-         "起床就像開機一樣，現在 boot 完了嗎？🚄",
-         "比鬧鐘還早醒的你，超猛 🚫☕",
-         "早上好啊！請收下這顆元氣彈 💥",
-         "今天的你：可愛100%、困意80% 😪",
-         "早上好，請保持可愛直到晚上 😍",
-         "太陽公公都在找你了 🌞",
-         "早餐加你就滿分了！🥞",
-         "醒了就不許再賴床喔 🥴",
-         "今天要勇敢，也要可愛 😺",
-         "祝你今天沒有bug只有糖果 🍬",
-         "笑一個，才有好運出門喔！🙌",
-         "你的訊息是我今天的陽光 ☀️",
-         "打起精神，今天也要超厲害！💪"
-],
-"晚上好": [
-        "晚上好！記得放鬆一下吧 🌚",
-        "嘿～你又撐過一天啦！🚀",
-        "來點晚安魔法嗎？✨🌟",
-        "今晚的空氣有點夢幻唷 🌌",
-        "晚上好呀，準備變成沙發馬鈴薯了嗎？🥔",
-        "這時段最適合看星星和耍廢 🛌",
-        "祝你有個閃亮又舒服的夜晚 🌃",
-        "今晚別熬夜唷（雖然我知道你會） 😭",
-        "給今天的你一顆溫暖的晚安糖 🍬",
-        "夜色迷人，但你更閃亮 😉",
-        "卸下疲憊，準備飛進夢裡啦 🌠",
-        "你今天真的有夠棒，給你拍拍手 👏",
-        "晚上好～先來一口宵夜開局 🥜",
-        "希望你夢到的幣都暴漲 🚀",
-        "月亮在偷看你打開 Telegram 🌜",
-        "夜深了，記得多抱抱自己 🤍",
-        "給你一張入夢的 VIP 入場券 🎈",
-        "準備進入放空模式...啟動！ 🛏️",
-        "晚風剛剛好，剛好可以當藉口耍廢 🍃",
-        "你已經夠努力了，來點放鬆吧 🌙"
-]  
-}
-# === 3. 問題關鍵字自動回覆字典 ===
-question_responses = {
-    "這什麼幣|这什么币": "這是比你努力還堅定的幣。",
-    "會漲嗎|会涨吗": "這問題和算命沒兩樣。買了你就信，不買你就沒得信。",
-    "還能買嗎|还能买吗": "現在不買，未來你會說『早知道』。現在買，未來你會說『太多了』。",
-    "能上幣安嗎|能上币安吗": "幣安在我們的 roadmap 裡，社群熱度你有貢獻嗎？🤨",
-    "可以 all in 嗎|可以 all in 吗": "可以。房子給我，戶頭給我，E3A 給你。Deal？",
-    "地板價多少|地板价多少": "問地板價前，先問問你心裡的底價在哪。😌",
-    "騙人吧|骗人吧": "騙你進群的不是我，是希望。這幣沒保證，只有信仰。⛩️",
-    "是詐騙嗎|是诈骗吗": "詐騙不會做網站、不會寫合約、不會回你訊息。我們會。你自己判斷。",
-    "能空投嗎|能空投吗": "能，但不是現在。你是要空投還是貢獻？順序不能錯。",
-    "什麼時候拉盤|什么时候拉盘": "當你停止問這句話的那一刻起，就開始了。📈",
-    "怎麼買|怎么买": "怎麼不去點置頂訊息，還在這邊問？😉",
-    "好項目介紹一下|好项目介绍一下": "現在看到的就是。剩下的靠緣分，不靠演算法。",
-    "多少倍": "你是算命師還是時間旅人？冷靜點。",
-    "這是 meme 幣嗎|这是 meme 币吗": "我們是信仰幣，帶點幽默的認真型。",
-    "是不是地板了": "沒有最地板，只有更地板。市場是無情的地心引力。",
-    "可以借錢買嗎|可以借钱买吗": "可以。但我建議你先借理智回來。",
-    "這個項目活著嗎|这个项目活着吗": "你在這個群裡，它還活著。不然我在這幹嘛？",
-    "請問 admin 在嗎|请问 admin 在吗": "Admin 不是客服，是生物。他在，他累，他正在 debug。",
-    "這群活人嗎|这群活人吗": "你現在講話了，至少有一個是。感謝你冒泡。",
-    "可以幫我解釋嗎|可以帮我解释吗": "可以。但你先去看白皮書，我再幫你畫圖。",
-    "還會跌嗎|还会跌吗": "會。因為你剛問完。市場就是這麼情緒化。",
-    "誰賣的|谁卖的": "不是你就好，別管那麼多。🫣",
-    "還有機會嗎|还有机会吗": "機會永遠在，問題是你還在不在。",
-    "還沒起飛|还没起飞": "我們這不是火箭，是鯨魚，要慢慢浮出來。🐋",
-    "我要多少錢才能財富自由|我要多少钱才能财富自由": "這問題要問財務顧問，不是 telegram bot。😑",
-    "能幫我看一下 chart 嗎|能帮我看一下 chart 吗": "圖表給了你方向，信仰給了你勇氣。請自己打開 Dexscreener。",
-    "有沒有人回答我|有没有人回答我": "現在有了。你開心了嗎？🥹",
-    "可以發在這裡嗎|可以发在这里吗": "如果你不是詐騙，那應該可以。",
-    "合約是不是改過|合约是不是改过": "你以為我們是 rug factory？開源透明，不要懷疑人生。",
-    "怎麼那麼慢|怎么那么慢": "鏈在動，人心不穩。你以為按下去就發財？先深呼吸。",
-    "E3A 是什麼|E3A 是什么": "E3A 是區塊鏈上的 AI 靈魂伴侶，也是你未來的幣圈奇蹟。"
-}
 
 # === 查價格功能 ===
 def get_e3a_price():
@@ -243,29 +56,6 @@ def get_e3a_price():
     except Exception as e:
         print("價格錯誤：", e)
         return None, None
-# === 5. 查持幣人數功能 ===
-def get_holder_count():
-    try:
-        url = f"https://api.helius.xyz/v1/token-metadata?api-key={HELIUS_KEY}"
-        headers = {
-            "accept": "application/json",
-            "Content-Type": "application/json"
-        }
-        body = {
-            "mint": E3A_ADDRESS
-        }
-
-        res = requests.post(url, headers=headers, json=body)
-        print("Debug: Response status", res.status_code)
-
-        data = res.json()
-        print("Debug: Response data", data)
-
-        return data.get("holders", "N/A")
-
-    except Exception as e:
-        print("取得持幣人數失敗：", e)
-        return "N/A"
 
 
 # === 自動轉發推特貼文（每 5 分鐘） ===
@@ -294,126 +84,42 @@ async def tweet_watcher(application):
 
         await asyncio.sleep(300)
 
-# === /faq 指令 ===
+
+# === help 指令 ===
+async def help_command(update: Update, context):
+    help_text = """✅ *E3A Bot Command Menu*
+
+Here are the available commands:
+/info - Show community info & links
+/help - Show all supported commands
+/faq - Frequently Asked Questions
+/stats - Show E3A Token price & market cap
+"""
+    await update.message.reply_text(help_text, parse_mode="Markdown")
+
+
+# === faq 指令 ===
 async def faq(update: Update, context):
-    text = """❓ *FAQ:*\n
+    text = """❓ *FAQ:*
+
 *Q:* Where to buy E3A?  
-*A:* You can buy it here: [DexScreener](https://dexscreener.com/solana/EKYotMbZR82JAVakfnaQbRfCE7oyWLsXVwfyjwTRdaos)\n
+*A:* [DexScreener](https://dexscreener.com/solana/EKYotMbZR82JAVakfnaQbRfCE7oyWLsXVwfyjwTRdaos)
+
 *Q:* Total Supply?  
-*A:* 1,000,000,000\n
+*A:* 1,000,000,000
+
 *Q:* Will it be listed on CEX?  
 *A:* Yes, roadmap includes Tier 1 exchange goals.
 """
     await update.message.reply_text(text, parse_mode="Markdown")
 
-# === 8. 持幣人數查詢 ===
-async def holders(update: Update, context):
-    holders = get_holder_count()
-    await update.message.reply_text(
-        f"📦 Current Holders of E3A: {holders} addresses"
-    )
 
-
-# === /stats 指令 ===
-async def stats(update: Update, context):
-    price, market_cap = get_e3a_price()
-    holders = get_holder_count()
-    if price:
-        await update.message.reply_text(
-            f"📊 *E3A Token Stats:*\n\n"
-            f"💰 Price: ${price}\n"
-            f"📈 Market Cap: ${market_cap:,} USD\n"
-            f"👛 Holders: {holders} addresses\n"
-            f"🔗 Contract: `{E3A_ADDRESS}`",
-            parse_mode="Markdown"
-        )
-    else:
-        await update.message.reply_text("Failed to fetch stats.")
-
-# === 情緒偵測與推薦閱讀 ===
+# === 情緒偵測 ===
 async def emotion_response(msg):
-    lower = zhconv.convert(msg.lower(), 'zh-hans')  # 自動轉為簡體比較統一比較判斷
-    if any(keyword in lower for keyword in [
-        "崩潰", "不行了", "想放棄", "虧爆", "跌爛", "爆倉", "被套", "好想賣", "心態炸了",
-        "亏爆", "跌烂", "爆仓", "被套", "好想卖", "心态炸了",
-        "割肉", "崩了", "慘了", "赔惨了", "赔光", "赔钱", "心累", "心很累",
-        "爆掉了", "跌爛了", "跌到懷疑人生", "一直虧", "虧到不想看"]):
-        return random.choice([
-            "😔 Looks like you're having a rough time. Here's something inspiring: https://ai.eternalai.io/blog",
-            "💪 Even the strongest fall. Rise again: https://ai.eternalai.io/blog",
-            "🌱 Growth comes from struggle. You're not alone.",
-            "🧠 Take a breath. Reset. Try again — you’ve got this!",
-            "🔥 You’ve made it this far, don’t stop now.",
-            "🎯 Challenges mean you're aiming high. Keep pushing.",
-            "🌄 Every dip is just the start of a comeback story.",
-            "🚀 The dip before the pump. Hang in there.",
-            "🔁 It’s okay to rest. Just don’t quit.",
-            "🤖 One bug at a time. You're debugging life.",
-            "👀 Take a break, look again tomorrow.",
-            "⚡️ Recharge. You're a human battery, not a bot.",
-            "🫂 Even AI gets overwhelmed. You're doing fine.",
-            "💬 Chat with the community — they get it.",
-            "🎶 Maybe it's time for some music and memes.",
-            "💡 You're closer than you think. Keep going.",
-            "🧭 The future isn’t built in one night.",
-            "🐋 Even whales start small.",
-            "🍀 Some things take time to bloom.",
-            "📈 This is just a dip. Zoom out.",
-            "🎮 This level is hard, but it’s not game over.",
-            "⏳ One more block, one more chance.",
-            "🎁 Sometimes the best gifts come after the hardest waits.",
-            "🧘 Calm is a skill. Practice it.",
-            "✨ Your presence already matters.",
-            "🏗️ Rome wasn’t built in a bull run either.",
-            "🚧 Today is hard, but not forever.",
-            "🌙 Even the moon has phases.",
-            "💎 Your strength is rarer than you think.",
-            "📚 Check out our blog — you might just find what you need: https://ai.eternalai.io/blog",
-            "🔗 Struggles now, stories later. You're in the middle of the good part.",
-            "🛠 Every setback is setup for a greater leap.",
-            "📦 Pack your emotions, we’re going up again soon.",
-            "💭 Even Satoshi had doubts. You’re doing fine."
-        ])
-    if any(keyword in lower for keyword in ["看不懂", "太難", "複雜", "不會買", "新手", "怎麼買", "怎麽買"]):
-        return "📘 Need help? Start with the whitepaper: https://ai.eternalai.io/static/Helloword.pdf"
-    if any(keyword in lower for keyword in ["沒希望", "完了", "沒救", "涼了", "歸零", "归零", "死了", "涼涼"]):
-        return "🌈 Don't lose hope. Check our roadmap and community strength: https://ai.eternalai.io"
-    if any(keyword in lower for keyword in [
-        "可以買嗎", "能上車嗎", "要不要買", "能買嗎", "all in", "買不買",
-        "可以买吗", "能上车吗", "要不要买", "能买吗", "买不买",
-        "能不能買", "進場時機", "還能上車", "補倉", "進不進場", "加倉", "再買點", "還來得及嗎",
-        "能不能买", "进场时机", "还能上车", "加仓", "再买点", "还来得及吗"]):
-        return random.choice([
-            "🧠 Remember to DYOR (Do Your Own Research). Start here: https://ai.eternalai.io",
-            "📊 Price is temporary, conviction is forever.",
-            "🔍 Not financial advice, but have you seen our whitepaper? https://ai.eternalai.io/static/Helloword.pdf",
-            "💸 Only invest what you’re willing to lose. And then double check that.",
-            "🙃 The best time to buy was yesterday. The second best time is after thinking twice.",
-            "👁️ Zoom out. Long-term vision always wins.",
-            "🤝 Join the discussion, not just the chart.",
-            "🧭 Ask yourself why you're here — then decide.",
-            "🎢 Emotions run high in crypto. Logic runs long.",
-            "🤔 Are you chasing pumps or building conviction?",
-            "🛑 Think. Feel. Then maybe act.",
-            "📈 Hype fades. Vision stays."
-        ])
+    lower = zhconv.convert(msg.lower(), 'zh-hans')
+    if any(keyword in lower for keyword in ["崩潰", "不行了", "想放棄", "虧爆", "跌爛", "爆倉"]):
+        return "💡 HODL or DYOR — Crypto is a roller coaster!"
     return None
-
-# ===  處理訊息 ===
-import re
-import zhconv  # 放最上面 imports 一起
-
-# === 新人歡迎詞 ===
-welcome_messages = [
-    "Welcome aboard, {name}! 🎉 Dive into the AI world with us.",
-    "Hey {name}, welcome to the fam! 🚀 Let’s build the future.",
-    "{name}, your journey to the moon begins here 🌕",
-]
-async def welcome_new_member(update: Update, context):
-    for user in update.message.new_chat_members:
-        text = random.choice(welcome_messages).format(name=user.full_name)
-        links = "\n\n🔗 Useful links:\n🌐 https://ai.eternalai.io/\n📄 https://ai.eternalai.io/static/Helloword.pdf\n💬 https://discord.com/invite/ZM7EdkCHZP\n🐦 https://x.com/e3a_eternalai"
-        await context.bot.send_message(chat_id=update.effective_chat.id, text=f"{text}{links}", parse_mode="Markdown")
 
 
 # === 處理訊息 ===
@@ -421,64 +127,39 @@ async def handle_message(update: Update, context):
     print("🧠 handle_message 被觸發")
     msg = update.message.text.lower()
 
-    # === scam 偵測 ===
     if any(word in msg for word in ["airdrop", "fakewallet", "詐騙", "诈骗", "空投"]):
-        await update.message.reply_text("⚠️ Reminder: Never click on unofficial airdrop links. Always verify with the team.")
+        await update.message.reply_text("⚠️ Reminder: Never click on unofficial airdrop links.")
         return
 
-    # === 價格與合約關鍵字 ===
     if any(x in msg for x in ["ca", "合約", "contract", "價格", "價錢", "price"]):
         price, market_cap = get_e3a_price()
         if price:
             await update.message.reply_text(
-                f"📊 *E3A Token Info:*\n\n"
-                f"🔗 Contract: `{E3A_ADDRESS}`\n"
-                f"💰 Price: ${price}\n"
-                f"📈 Market Cap: ${market_cap:,} USD",
+                f"📊 *E3A Token Info:*\n\n🔗 Contract: `{E3A_ADDRESS}`\n💰 Price: ${price}\n📈 Market Cap: ${market_cap:,} USD",
                 parse_mode='Markdown'
             )
         else:
             await update.message.reply_text("Failed to fetch price data.")
         return
 
-    # === 官網與常見連結 ===
-    if any(k in msg for k in ["官網", "eternalai", "網站", "site", "網址"]):
-        await update.message.reply_text("https://ai.eternalai.io/")
-        return
-    if any(k in msg for k in ["白皮書", "paper", "whitepaper"]):
-        await update.message.reply_text("https://ai.eternalai.io/static/Helloworld.pdf")
-        return
-    if any(k in msg for k in ["discord", "dc"]):
-        await update.message.reply_text("https://discord.com/invite/ZM7EdkCHZP")
-        return
-    if any(k in msg for k in ["telegram", "電報", "社群"]):
-        await update.message.reply_text("https://t.me/AIHelloWorld")
-        return
-    if any(k in msg for k in ["twitter", "推特"]):
-        await update.message.reply_text("https://x.com/e3a_eternalai?s=21&t=nKJh8aBy_Qblb-XTWP-UpQ")
-        return
+    links_map = {
+        "官網": "https://ai.eternalai.io/",
+        "eternalai": "https://ai.eternalai.io/",
+        "白皮書": "https://ai.eternalai.io/static/Helloworld.pdf",
+        "discord": "https://discord.com/invite/ZM7EdkCHZP",
+        "telegram": "https://t.me/AIHelloWorld",
+        "twitter": "https://x.com/e3a_eternalai?s=21&t=nKJh8aBy_Qblb-XTWP-UpQ"
+    }
 
-    # === 問題關鍵字自動回覆（簡體轉換＋正則）===
-    msg_simplified = zhconv.convert(msg, 'zh-hans')
-    for keyword, reply in question_responses.items():
-        if re.search(keyword, msg_simplified):
-            await update.message.reply_text(reply)
+    for keyword, link in links_map.items():
+        if keyword in msg:
+            await update.message.reply_text(link)
             return
-   
-    # === 情緒性關鍵字偵測 ===
+
     emotion_reply = await emotion_response(msg)
     if emotion_reply:
         await update.message.reply_text(emotion_reply)
         return
-
-
-    # === 早安晚安等關鍵詞詞庫 ===
-    for keyword, replies in text_responses.items():
-        if keyword in msg:
-            await update.message.reply_text(random.choice(replies))
-            return
-from telegram import ChatPermissions
-
 
 
 # === 主程式 ===
@@ -491,17 +172,15 @@ def main():
     app.add_handler(CommandHandler("help", help_command))
     app.add_handler(CommandHandler("faq", faq))
     app.add_handler(CommandHandler("stats", stats))
-    app.add_handler(CommandHandler("holders", holders))
-    app.add_handler(ChatMemberHandler(welcome_new_member, ChatMemberHandler.CHAT_MEMBER))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
     job_queue = app.job_queue
     if job_queue:
         job_queue.run_repeating(lambda ctx: asyncio.create_task(tweet_watcher(app)), interval=300, first=1)
 
-
     print("📡 Bot 已啟動，開始 polling 中...")
     app.run_polling()
+
 
 if __name__ == '__main__':
     main()
