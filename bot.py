@@ -105,7 +105,7 @@ async def faq(update: Update, context):
 *A:* [DexScreener](https://dexscreener.com/solana/EKYotMbZR82JAVakfnaQbRfCE7oyWLsXVwfyjwTRdaos)
 
 *Q:* Total Supply?  
-*A:* 1,000,000,000
+*A:* 10,000,000,000
 
 *Q:* Will it be listed on CEX?  
 *A:* Yes, roadmap includes Tier 1 exchange goals.
