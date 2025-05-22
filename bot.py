@@ -32,7 +32,7 @@ Welcome to EternalAI — your on-chain AI soulmate.
 
 🔗 *Useful Links*  
 🌐 Website: [eternalai.io](https://ai.eternalai.io/)  
-📄 Whitepaper: [Read here](https://ai.eternalai.io/static/Helloworld.pdf)  
+📄 Whitepaper: [Read here](https://ai.eternalai.io/Helloworld.pdf)  
 💬 Discord: [Join us](https://discord.com/invite/ZM7EdkCHZP)  
 🐦 Twitter: [Follow us](https://x.com/e3a_eternalai)  
 🛒 Buy Token: [DexScreener](https://dexscreener.com/solana/EKYotMbZR82JAVakfnaQbRfCE7oyWLsXVwfyjwTRdaos)
@@ -130,7 +130,7 @@ async def handle_message(update: Update, context):
         await update.message.reply_text("⚠️ Reminder: Never click on unofficial airdrop links.")
         return
 
-    if any(x in msg for x in ["ca", "合約", "contract", "價格", "價錢", "price"]):
+    if any(x in msg for x in ["/ca", "合約", "contract", "價格", "價錢", "price"]):
         price, market_cap = get_e3a_price()
         if price:
             await update.message.reply_text(
@@ -143,8 +143,10 @@ async def handle_message(update: Update, context):
 
     links_map = {
         "官網": "https://ai.eternalai.io/",
+        "website": "https://ai.eternalai.io/",
         "eternalai": "https://ai.eternalai.io/",
-        "白皮書": "https://ai.eternalai.io/static/Helloworld.pdf",
+        "白皮書": "https://ai.eternalai.io/Helloworld.pdf",
+        "whitepaper": "https://ai.eternalai.io/Helloworld.pdf",
         "discord": "https://discord.com/invite/ZM7EdkCHZP",
         "telegram": "https://t.me/AIHelloWorld",
         "twitter": "https://x.com/e3a_eternalai?s=21&t=nKJh8aBy_Qblb-XTWP-UpQ"
