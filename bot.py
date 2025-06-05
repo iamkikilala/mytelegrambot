@@ -130,7 +130,7 @@ async def handle_message(update: Update, context):
         await update.message.reply_text("⚠️ Reminder: Never click on unofficial airdrop links.")
         return
 
-    if any(x in msg for x in ["/ca", "合約", "contract", "價格", "價錢", "price"]):
+    if any(x in msg for x in ["/ca", "合約", "ca","contract", "價格", "價錢", "price"]):
         price, market_cap = get_e3a_price()
         if price:
             await update.message.reply_text(
